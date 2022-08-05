@@ -58,9 +58,9 @@ For instance the following code generated a face tiled with triangle.
     Ty = (0,1)
     faceEdges, axis = createFaceEdges(tile,Tx,Ty,1,2)
 ```
-The tile drawn in Cartesian coordinates can be seen below  
+The tile drawn in Cartesian coordinates can be seen below.  
 <img src="img/graph1.png" height=300 alt="The edges of a single tile">  
-Which gives the following tiling  
+Note that the tile is chosen such that no edges is present twice when the tiling is generated. This particular tile gives the following tiling.   
 <img src="img/graph2.png" height=300 alt="The corresponding tiling">  
 The function returns only the edges inside the defined triangle  
 <img src="img/graph3.png" height=300 alt="The edges of a triangular face">  
@@ -74,7 +74,8 @@ faceVertices = ((0, 0), (1, 2), (3, -1))
 Such a triangular face can then be turned into a graph. By copying this graph 20 times and merging nodes such that those 20 triangles forms an icosahedron, we can generate the graph of the corresponding capsid.
 This construction process is done with the help of a dictionary which associate each node with a list of face to which it belongs, along with its coordinates inside of that face. Initially every node only belong to one triangular face, with given coordinates inside of that face.  
 To glue two triangular faces $F_0$ and $F_1$, we first rotate all the points of $F_0$ point by 60 degrees along one of the triangular vertices. Then for each point in $F_0$, we search for a point in $F_1$ with the same coordinates. If such a point is found, those points are merged together : they get merged onto the graph as one node and their coordinate list in the dictionary are concatenated.  
-<img src="img/faceFusing.png" height=300 alt="Two faces being fused together">  
+<img src="img/faceMerge.png" height=400 alt="Two faces being fused together">  
+For instance here the face $F_0$ have been rotated clockwise around $(0,0)$, the blue node would now have the following coordinates $[(face:0,x:1,y:1),(face:1,x:2,y:-1)]$  
 Once all 20 triangular faces have been correctly assembled, the corresponding graph is the final result. In our example the graph looks like this (graph visualized with the `draw` function of networkx)  
 <img src="img/graph4.png" height=300 alt="The final graph" style="margin:auto">  
 This process is implemented in the function `createCapsidGraph` which takes as input :
