@@ -138,6 +138,8 @@ def createFaceGraph(edges:List[Edge],faceId:int,startId:int,bondStrength:List[fl
 #faceEdges : an array of vertices corresponding to the edges in a traingular face of the capsid
 #triangleVertices : tuple of three points corresponding to the three vertices of the triangular face overlayed on the lattice
 def createCapsidGraph(faceEdges:List[Edge],triangleVertices:Tuple[Point,Point,Point],bondStrength:List[float]=None)->nx.Graph:
+	if 0 in bondStrength:
+		raise Exception("Bond cannot have 0 energy")
 	G = nx.Graph()
 	coordinates = {}
 	nodeId = 0
