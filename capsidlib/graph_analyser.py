@@ -135,7 +135,6 @@ def getFragmentationWeightedProbabilityEdges(G:nx.Graph,fragmentationEnergy:floa
 	weights = []
 	for e in edges:
 		weights.append(1/bondEnergy[e])
-	print(weights)
 	minBondEnergy=1/max(weights)  #Energy of the weakest bond
 	if(debug):
 		print("STARTED E=",fragmentationEnergy,stopCondition)
@@ -214,7 +213,6 @@ def getEnergyPercolationThresholdEdges(G:nx.Graph,probaError:float,nDicho:int,mi
 	while n < nDicho:
 		m= (a+b)/2
 		n += 1
-		print(n)
 		pfrag, aborted = getFragmentationWeightedProbabilityEdges(G,m,{"conditionType":"dichotomy","errorProbability":eps,"minIterations":minIterations,"maxIterations":maxIterations},debug=debug)
 		if aborted: 
 			return m,n
@@ -296,7 +294,7 @@ def getFragmentationWeightedProbabilityNodes(G:nx.Graph,fragmentationEnergy:floa
 						G_.nodes[neighbour]["energy"] -= edgeAttributes["energy"]
 
 						#Put the neighbours to be removed in a separate list to keep the current node to remove at the index i in the remainingNode list
-						if(G_.nodes[neighbour]["energy"] != 0):
+						if(G_.nodes[neighbour]["energy"] >1e-15):
 							remainingNodesWeights[neighbourIndex] = abs(1/G_.nodes[neighbour]["energy"])
 						else:
 							removedNeighbours.append(remainingNodes[neighbourIndex])
@@ -309,6 +307,7 @@ def getFragmentationWeightedProbabilityNodes(G:nx.Graph,fragmentationEnergy:floa
 					neighbourIndex = remainingNodes.index(neighbour)
 					del remainingNodes[neighbourIndex]
 					del remainingNodesWeights[neighbourIndex]
+					removedNodes.append(neighbour)
 				#update weakest bond energy
 				if(len(remainingNodesWeights) > 0):
 					minNodeEnergy=1/max(remainingNodesWeights)
