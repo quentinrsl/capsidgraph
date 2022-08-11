@@ -1,10 +1,7 @@
-from copyreg import remove_extension
 import random
 import time
 from typing import Dict, List, Tuple
-from uuid import getnode
 import networkx as nx
-import matplotlib.pyplot as plt
 
 #===========================
 #non weighted graph analysis
@@ -13,10 +10,10 @@ import matplotlib.pyplot as plt
 #returns the probability of the capsid beign fragmented if every nodes / edges are removed with probability p
 #stopCondition is a dictionary that looks like this
 # {
-# 'conditionType': dichotomy / fixedIterations, 
-# 'errorProbability': float between 0 and 1, only required for dichotomy, upper bound of the probability that the dichotomy will give a wrong result for the next dichotomy step (ie a value higer than 0.5 when the actual value is below 0.5 or the opposite, because in this stopCondition, we only care if the probability is above or below 0.5, not the actual vlaue).
-# 'minIterations': minimum amount of iterations, only required for dichotomy
-# 'maxIterations': maximum amount of iterations before giving up, only required for dichotomy, (to prevent unnecessary long computation, as the amount of ityeration to get above the lower bound of error is theoretically unbounded and gets bigger as we compute values closer to 0.5)
+# 'conditionType': bisection / fixedIterations, 
+# 'errorProbability': float between 0 and 1, only required for bisection, upper bound of the probability that the function will return a wrong result for the next bisection step (ie a value higer than 0.5 when the actual value is below 0.5 or the opposite, because in this stopCondition, we only care if the probability is above or below 0.5, not the actual vlaue).
+# 'minIterations': minimum amount of iterations, only required for bisection
+# 'maxIterations': maximum amount of iterations before giving up, only required for bisection, (to prevent unnecessary long computation, as the amount of ityeration to get above the lower bound of error is theoretically unbounded and gets bigger as we compute values closer to 0.5)
 # 'iterations': number of iterations, only required for fixedIterations
 # }
 #fragType is "edges" or "nodes" and determines if edges or nodes will be removed
@@ -28,22 +25,22 @@ def getFragmentationProbability(G:nx.Graph,p:float,stopCondition:Dict,fragType:s
 	
 	#Get simulation parameters
 	conditionType = stopCondition["conditionType"]
-	if(conditionType not in ["dichotomy", "fixedIterations"]):
+	if(conditionType not in ["bisection", "fixedIterations"]):
 		raise Exception("Invalid stop condition type provided")
 
-	if(conditionType == "dichotomy"):
+	if(conditionType == "bisection"):
 		errorProbability = stopCondition["errorProbability"]
 		minIterations = stopCondition["minIterations"]
 		maxIterations = stopCondition["maxIterations"]
 		INV_PROBA=1/errorProbability
 	#Condtion to satisfy to get under the upper bound of the probability of having a wrong result
 	#Given by the Bienaymé-Tchebitchev inequality
-	while (conditionType == "dichotomy" and ((4*n*((pfrag-0.5)**2) < INV_PROBA) or n<minIterations)) or (conditionType == "fixedIterations" and n < stopCondition['iterations']):
+	while (conditionType == "bisection" and ((4*n*((pfrag-0.5)**2) < INV_PROBA) or n<minIterations)) or (conditionType == "fixedIterations" and n < stopCondition['iterations']):
 		#Give up if too many iterations
-		if(conditionType == "dichotomy" and n > maxIterations):
+		if(conditionType == "bisection" and n > maxIterations):
 			return (pfrag, True)
 		if(n%1000 == 0 and debug):
-			print("Progress : n=",n,"progress=", 100 * 4*n*((pfrag-0.5)**2) / INV_PROBA if conditionType == "dichotomy" else "")
+			print("Progress : n=",n,"progress=", 100 * 4*n*((pfrag-0.5)**2) / INV_PROBA if conditionType == "bisection" else "")
 		G_ = G.copy()
 		if(fragType=="nodes"):
 			#Remove each nodes with probability p
@@ -64,17 +61,17 @@ def getFragmentationProbability(G:nx.Graph,p:float,stopCondition:Dict,fragType:s
 		print("p=",p,"with n=",n,"got p(frag)=",pfrag,1000*(time.time()-start)/n,"ms/sim")
 	return pfrag, False
 
-#Returns the percolation threshold of a given graph with the probability of the result being wrong below errorProbability, as well as the number of dichotomy steps occured
-#nDicho is an integer representing the number of dichotomy step
-def getPercolationThreshold(G:nx.Graph,errorProbability:float,nDicho:int,fragType:str,minIterations:int,maxIterations:int)->Tuple[float,int]:
-	eps = 1 - (1 - errorProbability) ** (1/nDicho)   #Compute the upper bond of error for one dichotomy step from the upper bond of making a mistake in the entire process
+#Returns the percolation threshold of a given graph with the probability of the result being wrong below errorProbability, as well as the number of bisection steps occured
+#nSteps is an integer representing the number of bisection step
+def getPercolationThreshold(G:nx.Graph,errorProbability:float,nSteps:int,fragType:str,minIterations:int,maxIterations:int)->Tuple[float,int]:
+	eps = 1 - (1 - errorProbability) ** (1/nSteps)   #Compute the upper bond of error for one bisection step from the upper bond of making a mistake in the entire process
 	a = 0
 	b = 1
 	n = 0
-	while n < nDicho:
+	while n < nSteps:
 		m= (a+b)/2
 		n += 1
-		pfrag, aborted = getFragmentationProbability(G,m,{"conditionType":"dichotomy","errorProbability":eps,"minIterations":minIterations,"maxIterations":maxIterations},fragType)
+		pfrag, aborted = getFragmentationProbability(G,m,{"conditionType":"bisection","errorProbability":eps,"minIterations":minIterations,"maxIterations":maxIterations},fragType)
 		if aborted: 
 			return m,n
 		elif pfrag>0.5:
@@ -120,10 +117,10 @@ def fragmentSizeDistribution(G:nx.Graph,p:float,n:int,fragType="nodes")->List[fl
 #fragmentationEnergy: a float between 0 and 1 with 1 meaning all the capsid will be removed and 0 no energy will be removed
 #stopCondition :
 # {
-# 'conditionType': dichotomy / fixedIterations, 
-# 'errorProbability': float between 0 and 1, only required for dichotomy, upper bound of the probability that the dichotomy will give a wrong result for the next dichotomy step (ie a value higer than 0.5 when the actual value is below 0.5 or the opposite, because in this stopCondition, we only care if the probability is above or below 0.5, not the actual vlaue).
-# 'minIterations': minimum amount of iterations, only required for dichotomy
-# 'maxIterations': maximum amount of iterations before giving up, only required for dichotomy, (to prevent unnecessary long computation, as the amount of ityeration to get above the lower bound of error is theoretically unbounded and gets bigger as we compute values closer to 0.5)
+# 'conditionType': bisection / fixedIterations, 
+# 'errorProbability': float between 0 and 1, only required for bisection, upper bound of the probability that the bisection will give a wrong result for the next bisection step (ie a value higer than 0.5 when the actual value is below 0.5 or the opposite, because in this stopCondition, we only care if the probability is above or below 0.5, not the actual vlaue).
+# 'minIterations': minimum amount of iterations, only required for bisection
+# 'maxIterations': maximum amount of iterations before giving up, only required for bisection, (to prevent unnecessary long computation, as the amount of ityeration to get above the lower bound of error is theoretically unbounded and gets bigger as we compute values closer to 0.5)
 # 'iterations': number of iterations, only required for fixedIterations
 # }
 #Returns a tuple (float, boolean), first value is the fragmentation energy, second value is whether or not the function stopped because it had reached the maximum amount of iterations
@@ -145,10 +142,10 @@ def getFragmentationWeightedProbabilityEdges(G:nx.Graph,fragmentationEnergy:floa
 
 	#Get simulation parameters
 	conditionType = stopCondition["conditionType"]
-	if(conditionType not in ["dichotomy", "fixedIterations"]):
+	if(conditionType not in ["bisection", "fixedIterations"]):
 		raise Exception("Invalid stop condition type provided")
 		
-	if(conditionType == "dichotomy"):
+	if(conditionType == "bisection"):
 		errorProbability = stopCondition["errorProbability"]
 		minIterations = stopCondition["minIterations"]
 		maxIterations = stopCondition["maxIterations"]
@@ -156,13 +153,13 @@ def getFragmentationWeightedProbabilityEdges(G:nx.Graph,fragmentationEnergy:floa
 	
 	#Simulation
 	#Check if stop condition is met
-	while (conditionType == "dichotomy" and ((4*n*((pfrag-0.5)**2) < INV_PROBA) or n<minIterations)) or (conditionType == "fixedIterations" and n < stopCondition['iterations']):
+	while (conditionType == "bisection" and ((4*n*((pfrag-0.5)**2) < INV_PROBA) or n<minIterations)) or (conditionType == "fixedIterations" and n < stopCondition['iterations']):
 		#Give up if too many iterations
-		if(conditionType == "dichotomy" and n > maxIterations):
+		if(conditionType == "bisection" and n > maxIterations):
 			return (pfrag, True)
 		#Print debug statement
 		if(n%1000 == 0 and debug):
-			print("Progress : n=",n,"progress=", 100 * 4*n*((pfrag-0.5)**2) / INV_PROBA if conditionType == "dichotomy" else "")
+			print("Progress : n=",n,"progress=", 100 * 4*n*((pfrag-0.5)**2) / INV_PROBA if conditionType == "bisection" else "")
 		G_ = G.copy()
 		remainingEdges = list(G_.edges)
 		removedEdges = []
@@ -202,18 +199,18 @@ def getFragmentationWeightedProbabilityEdges(G:nx.Graph,fragmentationEnergy:floa
 		print("ENDED p(E=,",fragmentationEnergy,")=",pfrag,"time:",1000*(time.time()-start)/n,"ms/sim","N=",n)
 	return (pfrag, False)
 
-#Returns the percolation energy for which the probability of fragmentation is 0.5 of graph G, wit probability of beign wrong less than probaError and with a maximum amount of dichotomy step of nDicho
-#The minIterations is the minimum amount of iterations before the next dichotomy step
-#The maxIterations value is the maximum amount of iterations before the dichotomy process aborts
-def getEnergyPercolationThresholdEdges(G:nx.Graph,probaError:float,nDicho:int,minIterations:int= 5000, maxIterations:int= 10000000,debug:bool=False)->Tuple[float,int]:
-	eps = 1 - (1 - probaError) ** (1/nDicho)   #Compute the upper bond of error for one dichotomy step from the upper bond of making a mistake in the entire process
+#Returns the percolation energy for which the probability of fragmentation is 0.5 of graph G, wit probability of beign wrong less than probaError and with a maximum amount of bisection step of nSteps
+#The minIterations is the minimum amount of iterations before the next bisection step
+#The maxIterations value is the maximum amount of iterations before the bisection process aborts
+def getEnergyPercolationThresholdEdges(G:nx.Graph,probaError:float,nSteps:int,minIterations:int= 5000, maxIterations:int= 10000000,debug:bool=False)->Tuple[float,int]:
+	eps = 1 - (1 - probaError) ** (1/nSteps)   #Compute the upper bond of error for one bisection step from the upper bond of making a mistake in the entire process
 	a = 0
 	b = 1
 	n = 0
-	while n < nDicho:
+	while n < nSteps:
 		m= (a+b)/2
 		n += 1
-		pfrag, aborted = getFragmentationWeightedProbabilityEdges(G,m,{"conditionType":"dichotomy","errorProbability":eps,"minIterations":minIterations,"maxIterations":maxIterations},debug=debug)
+		pfrag, aborted = getFragmentationWeightedProbabilityEdges(G,m,{"conditionType":"bisection","errorProbability":eps,"minIterations":minIterations,"maxIterations":maxIterations},debug=debug)
 		if aborted: 
 			return m,n
 		elif pfrag > 0.5:
@@ -256,20 +253,20 @@ def getFragmentationWeightedProbabilityNodes(G:nx.Graph,fragmentationEnergy:floa
 
 	#Get simulation parameters
 	conditionType = stopCondition["conditionType"]
-	if(conditionType not in ["dichotomy", "fixedIterations"]):
+	if(conditionType not in ["bisection", "fixedIterations"]):
 		raise Exception("Invalid stop condition type provided")
-	if(conditionType == "dichotomy"):
+	if(conditionType == "bisection"):
 		errorProbability = stopCondition["errorProbability"]
 		minIterations = stopCondition["minIterations"]
 		maxIterations = stopCondition["maxIterations"]
 		INV_PROBA=1/errorProbability
 	#Simulations
-	while (conditionType == "dichotomy" and ((4*n*((pfrag-0.5)**2) < INV_PROBA) or n<minIterations)) or (conditionType == "fixedIterations" and n < stopCondition['iterations']):
+	while (conditionType == "bisection" and ((4*n*((pfrag-0.5)**2) < INV_PROBA) or n<minIterations)) or (conditionType == "fixedIterations" and n < stopCondition['iterations']):
 		#Give up if too many iterations
-		if(conditionType == "dichotomy" and n > maxIterations):
+		if(conditionType == "bisection" and n > maxIterations):
 			return (pfrag, True)
 		if(n%1000 == 0 and debug):
-			print("Progress : n=",n,"progress=", 100 * 4*n*((pfrag-0.5)**2) / INV_PROBA if conditionType == "dichotomy" else "")
+			print("Progress : n=",n,"progress=", 100 * 4*n*((pfrag-0.5)**2) / INV_PROBA if conditionType == "bisection" else "")
 		G_ = G.copy()
 		remainingNodes = list(G_.nodes)
 		removedNodes = []
@@ -314,7 +311,7 @@ def getFragmentationWeightedProbabilityNodes(G:nx.Graph,fragmentationEnergy:floa
 			else:
 				#All edges have been removed
 				break
-		#remove bonds to be removed
+
 		for node in removedNodes:
 			G_.remove_node(node)
 		n += 1
@@ -326,15 +323,15 @@ def getFragmentationWeightedProbabilityNodes(G:nx.Graph,fragmentationEnergy:floa
 	return (pfrag, False)    
 
 #Same than with the edges but with nodes
-def getEnergyPercolationThresholdNodes(G:nx.Graph,probaError:float,nDicho:int,minIterations:int= 5000, maxIterations:int= 10000000,debug:bool=False)->Tuple[float,int]:
-	eps = 1 - (1 - probaError) ** (1/nDicho)   #Compute the upper bond of error for one dichotomy step from the upper bond of making a mistake in the entire process
+def getEnergyPercolationThresholdNodes(G:nx.Graph,probaError:float,nSteps:int,minIterations:int= 5000, maxIterations:int= 10000000,debug:bool=False)->Tuple[float,int]:
+	eps = 1 - (1 - probaError) ** (1/nSteps)   #Compute the upper bond of error for one bisection step from the upper bond of making a mistake in the entire process
 	a = 0
 	b = 1
 	n = 0
-	while n < nDicho:
+	while n < nSteps:
 		m= (a+b)/2
 		n += 1
-		pfrag, aborted = getFragmentationWeightedProbabilityNodes(G,m,{"conditionType":"dichotomy","errorProbability":eps,"minIterations":minIterations,"maxIterations":maxIterations},debug=debug)
+		pfrag, aborted = getFragmentationWeightedProbabilityNodes(G,m,{"conditionType":"bisection","errorProbability":eps,"minIterations":minIterations,"maxIterations":maxIterations},debug=debug)
 		if aborted: 
 			return m,n
 		elif pfrag > 0.5:
