@@ -74,7 +74,7 @@ faceVertices = ((0, 0), (1, 2), (3, -1))
 
 ## Graph generation
 Given one triangular face of an icosahedron as described above, the graph of an icosahedral surface lattice is obtained as follows. By copying this face 20 times and merging nodes such that those 20 triangles match at the icosahedral edges, we generate the graph of the corresponding capsid. This construction is done with the help of a dictionary that associates to each node the face(s) associated with it, along with its coordinates inside each face. Initially every node only belongs to one triangular face, and this information is stored in terms of its coordinates inside that face. To glue two triangular faces $F_0$ and $F_1$ together, we first rotate all the points of $F_0$ by 60 degrees along one of the triangular vertices. Then for each point in $F_0$, we search for a point in $F_1$ with the same coordinates. If such a point is found, those points are merged. For this, they are retained as a single node in the graph, and their coordinate lists in the dictionary are concatenated.  
-<img src="img/faceFusing.png" height=300 alt="Two faces being fused together">  
+<img src="img/faceMerge.png" height=300 alt="Two faces being fused together">  
 Once all 20 triangular faces have been correctly assembled into an icosahedral surface lattice, the associated graph is fully assembled. In our example, the graph looks like this (graph visualised with the `draw` function of networkx)  
 <img src="img/graph4.png" height=300 alt="The final graph" style="margin:auto">  
 This construction is implemented in the function `createCapsidGraph` which takes the following parameters as input:
