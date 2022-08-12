@@ -1,14 +1,14 @@
 from capsidlib.graph_generator import *
 from capsidlib.graph_analyser import *
 from polyomavirus_generator import *
-
-#SIMULATION PARAMETERS
-fragmentationType = "nodes"
+# Compute the energy percolation threshold for bond/edge removal, for given vales of fa,fb (The share of the total energy respectively give to types A and B bonds). 
+# Settings :
+fragmentationType = "edges"
 nSteps = 8
 probaError = 0.05
 fa = 2/7
 fb = 2/7
-fc = 3/7
+fc = 1-fa-fb
 
 a = fa/60
 b = fb/60

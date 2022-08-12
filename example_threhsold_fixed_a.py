@@ -6,13 +6,16 @@ from capsidlib.graph_generator import *
 from capsidlib.graph_analyser import *
 from polyomavirus_generator import *
 
-#SIMULATION PARAMETERS
+# Compute the energy percolation threshold for different energy distribution between B and C bonds.
+# The share of energy givent to A bonds is fixed to 2/7
+# Settings :
 fragmentationType = "edges"
 
-processCount = 1	#Number of processes
-nSteps = 3			#Nb of iterations
+processCount = 4	#Number of processes
+nSteps = 8			#Nb of iterations
 pointNumber = 10	#Number of points to compute
 probaError = 0.05
+
 X = np.linspace(0.01,5/7 - 0.01,pointNumber)
 
 def worker(x):

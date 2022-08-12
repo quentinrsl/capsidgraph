@@ -17,6 +17,7 @@ pattern666 = [
 	#Translation vector to create the lattice
 	(1, 1),
 	(-1,2),
+	#Scaling factor to compute triangulation number
 	3
 ]
 
@@ -97,6 +98,7 @@ pattern6434 = [
 		3
 ]
 
+# Generation of a graph with T=7 and a triangular lattice
 P = pattern666dual
 h = 1
 k = 2
