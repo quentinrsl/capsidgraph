@@ -21,32 +21,32 @@ def rotate(P:Point,theta:float)->Point:
         x*sin(theta) + y*cos(theta)
     )
 
-#Affiche l'image d'une face icosahédrique de la capsid
-def createFaceImage(pattern:Tuple[List[Edge],Point,Point,int],h:int,k:int,lineWidth:float=10,lineColor:Tuple[int,int,int]=(0,0,0),scale:float=500):
+#return the image of an icosahedral face of the capsid
+def getFaceImage(pattern:Tuple[List[Edge],Point,Point,int],h:int,k:int,lineWidth:float=10,lineColor:Tuple[int,int,int]=(0,0,0),scale:float=500)->Image:
 
-    #On récupère un pattern avec les vecteurs de translations pour le pavage
+    #Get the required data to generate the tiling
     [edges, Tx, Ty] = pattern[:3]
     
-    #ON récupère les coordonées du traingle dans lequel on va découper l'image 
+    #Coordinates of the triangle to cut into the tiling
     A,B,C = createTriangle(h,k,Tx,Ty)
-    theta= atan2(carth(B)[0],carth(B)[1])   #Angle duquel on va faire tourner toute l'image pour l'avoir avec la bonne orientation
-    #Largeur et hauteur de l'image finale
+    theta= atan2(carth(B)[0],carth(B)[1])   #Angle by which we need to rotate the image to get the right orientation
+    #width and height of the final image
     width = int(rotate(carth(C),theta)[0]) * scale
     height = int(rotate(carth(B),theta)[1]) * scale
-    #On duplique le pattern autant que nécessaire
+    #Duplicate the tile as much as necessary
     for i in range(h+k):
         edges = extend(edges,Tx)
     for i in range(h+k):
         edges = extend(edges,Ty)
-    #Liste des segments en coordonnées hexagonales
+    #Get the list of extyracted lines
     edges = extractTriangle(edges,h,k,Tx,Ty)
     
-    #On les converti en coordonnées carthésiennes, et on les tourne de theta
+    #Convert them back into carthesian coordinates and rotate them
     carthEdges = []
     for P1,P2 in edges:
         carthEdges.append((rotate(carth(P1),theta), rotate(carth(P2),theta)))
     
-    #On les dessine sur un canvas
+    #Draw the lines and show the image
     im = Image.new(mode="RGBA", size=(width,height), color=(255,255,255))
     draw = ImageDraw.Draw(im)
     for (x1,y1),(x2,y2) in carthEdges:
@@ -54,4 +54,4 @@ def createFaceImage(pattern:Tuple[List[Edge],Point,Point,int],h:int,k:int,lineWi
     
     draw.polygon([(0,0),(width, height/2),(width,0)],(255,255,255))
     draw.polygon([(0,height),(width, height/2),(width,height)],(255,255,255))
-    im.show()
+    return im
