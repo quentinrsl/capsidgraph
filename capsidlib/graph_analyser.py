@@ -91,12 +91,12 @@ def fragmentSizeDistribution(G:nx.Graph,p:float,n:int,fragType="nodes")->List[fl
 	for i in range(n):
 		G_ = G.copy()
 		if(fragType=="nodes"):
-		# On supprime chaque noeud avec une probability de p
+		# Remove each nodes with probaiblity p
 			for node in G.nodes:
 				if(random.random() < p):
 					G_.remove_node(node)
 		elif(fragType=="edges"):
-			#On supprime chaque arrete avec une probability de p
+		# Remove each edge with probaiblity p
 			for a,b in G.edges:
 				if(random.random() < p):
 					G_.remove_edge(a,b)
@@ -234,7 +234,6 @@ def getNodeAttributes(G:nx.Graph,node:int)->None:
 def getFragmentationWeightedProbabilityNodes(G:nx.Graph,fragmentationEnergy:float,stopCondition:dict,debug:bool=False)->Tuple[float,bool]:
 	#Initializing nodes attributes
 	for node in G.nodes():
-	# for node in G_.nodes():
 		nodeEnergy = getNodeAttributes(G,node)
 		G.nodes[node]["energy"] = nodeEnergy
 	#Compute node weights
