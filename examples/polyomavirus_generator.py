@@ -1,4 +1,4 @@
-from capsidlib.graph_generator import createCapsidGraph
+from capsidgraph.graph_generator import createCapsidGraph
 
 
 #Create the capsid of the polyomavirus with given energy on a, b and c edges

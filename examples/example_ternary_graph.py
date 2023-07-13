@@ -1,6 +1,6 @@
 from multiprocessing import Pool
-from capsidlib.graph_generator import *
-from capsidlib.graph_analyser import *
+from capsidgraph.graph_generator import *
+from capsidgraph.graph_analyser import *
 import ternary
 from polyomavirus_generator import createPolyomavirusCapsid
 

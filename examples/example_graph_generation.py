@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 from math import sqrt
 
-from capsidlib.graph_generator import *
-from capsidlib.graph_analyser import *
+from capsidgraph.graph_generator import *
+from capsidgraph.graph_analyser import *
 
 pattern666 = [
 	[

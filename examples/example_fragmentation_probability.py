@@ -2,8 +2,8 @@ from multiprocessing import Pool
 from matplotlib import pyplot as plt
 import numpy as np
 
-from capsidlib.graph_generator import *
-from capsidlib.graph_analyser import *
+from capsidgraph.graph_generator import *
+from capsidgraph.graph_analyser import *
 from polyomavirus_generator import *
 
 #Compute the fragmentation probability of the polyomavirus graph for different fractions of energy removed

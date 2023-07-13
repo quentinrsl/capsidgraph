@@ -2,8 +2,8 @@ from multiprocessing import Pool
 import numpy as np
 from dbcreds import *
 
-from capsidlib.graph_generator import *
-from capsidlib.graph_analyser import *
+from capsidgraph.graph_generator import *
+from capsidgraph.graph_analyser import *
 from polyomavirus_generator import *
 
 # Compute the energy percolation threshold for different energy distribution between B and C bonds.

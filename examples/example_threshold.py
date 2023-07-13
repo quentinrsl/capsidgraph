@@ -1,5 +1,5 @@
-from capsidlib.graph_generator import *
-from capsidlib.graph_analyser import *
+from capsidgraph.graph_generator import *
+from capsidgraph.graph_analyser import *
 from polyomavirus_generator import *
 # Compute the energy percolation threshold for bond/edge removal, for given vales of fa,fb (The share of the total energy respectively give to types A and B bonds). 
 # Settings :

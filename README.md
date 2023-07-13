@@ -1,5 +1,5 @@
-# Capsidlib
-Capsidlib is a python library for generating and studying the graphs representing the protein subunit interaction networks of viral capsids.
+# Capsidgraph
+Capsidgraph is a python library for generating and studying the graphs representing the protein subunit interaction networks of viral capsids.
 # Required libraries
 * The `networkx` library is used to handle operations on graphs.
 * The `matplotlib`, `numpy` and `python-ternary` libraries are used to create figures.

@@ -17,7 +17,7 @@ import networkx as nx
 # 'iterations': number of iterations, only required for fixedIterations
 # }
 #fragType is "edges" or "nodes" and determines if edges or nodes will be removed
-def getFragmentationProbability(G:nx.Graph,p:float,stopCondition:Dict,fragType:str,debug:bool=False)->int:
+def getFragmentationProbability(G:nx.Graph,p:float,stopCondition:Dict,fragType:str,debug:bool=False)->Tuple[float,bool]:
 	start = time.time()
 	fragmentedCount = 0
 	pfrag = 0
@@ -63,7 +63,7 @@ def getFragmentationProbability(G:nx.Graph,p:float,stopCondition:Dict,fragType:s
 
 #Returns the percolation threshold of a given graph with the probability of the result being wrong below errorProbability, as well as the number of bisection steps occured
 #nSteps is an integer representing the number of bisection step
-def getPercolationThreshold(G:nx.Graph,errorProbability:float,nSteps:int,fragType:str,minIterations:int,maxIterations:int)->Tuple[float,int]:
+def getPercolationThreshold(G:nx.Graph,errorProbability:float,nSteps:int,fragType:str,minIterations:int,maxIterations:int, debug:bool=False)->Tuple[float,int]:
 	eps = 1 - (1 - errorProbability) ** (1/nSteps)   #Compute the upper bond of error for one bisection step from the upper bond of making a mistake in the entire process
 	a = 0
 	b = 1
@@ -71,7 +71,7 @@ def getPercolationThreshold(G:nx.Graph,errorProbability:float,nSteps:int,fragTyp
 	while n < nSteps:
 		m= (a+b)/2
 		n += 1
-		pfrag, aborted = getFragmentationProbability(G,m,{"conditionType":"bisection","errorProbability":eps,"minIterations":minIterations,"maxIterations":maxIterations},fragType)
+		pfrag, aborted = getFragmentationProbability(G,m,{"conditionType":"bisection","errorProbability":eps,"minIterations":minIterations,"maxIterations":maxIterations}, fragType,debug=debug)
 		if aborted: 
 			return m,n
 		elif pfrag>0.5:
@@ -241,7 +241,6 @@ def getFragmentationWeightedProbabilityNodes(G:nx.Graph,fragmentationEnergy:floa
 	weights = []
 	for e in G.nodes:
 		weights.append(1/G.nodes[e]["energy"])
-	minNodeEnergy=1/max(weights)  #Energy of the weakest bond
 	if(debug):
 		print("STARTED NODES E=",fragmentationEnergy,stopCondition)
 
@@ -338,3 +337,61 @@ def getEnergyPercolationThresholdNodes(G:nx.Graph,probaError:float,nSteps:int,mi
 		else:
 			a = m
 	return m,n
+
+
+#===================
+# Hole Size Detection
+#===================
+
+## Unweighted graphs
+
+def _getHoleSize(percolatedGraph, originalGraph):
+	import matplotlib.pyplot as plt
+	# print("Percolated graph")
+	# nx.draw(percolatedGraph)
+	# plt.show()
+
+	connectedComponents = list(nx.connected_components(percolatedGraph))
+	if(len(connectedComponents) == 0):
+		return len(originalGraph.nodes)
+	largestComponentSize = len(max(connectedComponents, key=len))
+	largestComponents = [c for c in connectedComponents if len(c) == largestComponentSize]
+	minHoleSize = None
+	for largestComponent in largestComponents:
+	# 	nx.draw(originalGraph.subgraph(largestComponent))
+	# 	plt.show()
+		hole = originalGraph.subgraph(originalGraph.nodes - largestComponent)
+		if(len(hole.nodes) == 0):
+			return 0
+		holeSize = len(max(nx.connected_components(hole), key=len))
+		if minHoleSize == None or holeSize < minHoleSize:
+			minHoleSize = holeSize
+	return minHoleSize
+
+def getHoleSizeDistribution(G:nx.Graph, p:float, iterations: int, removeType:str="nodes", debug:bool=False):
+	# Initialize the list of hole sizes
+	holeSizes = {}
+	# For each iteration
+	if removeType == "nodes":
+		nx.set_node_attributes(G, False, "removed") 
+	else:
+		nx.set_edge_attributes(G, False, "removed")
+	for i in range(iterations):
+		# Copy the graph
+		G_ = G.copy()
+		if removeType == "nodes":
+			# Generation of the graph composed of the removed nodes
+			# Remove nodes with probability 1-p
+			for n in G.nodes:
+				if random.random() < p:
+					G_.remove_node(n)
+		else:
+			# Remove edges with probability p
+			for e in G.edges():
+				if random.random() < p:
+					G_.remove_edge(e[0], e[1])
+		m = _getHoleSize(G_, G)
+		holeSizes[m] = holeSizes.get(m, 0) + 1
+	return holeSizes
+
+				
