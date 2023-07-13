@@ -25,9 +25,13 @@ def get_framentation_probability(
     fragmentation_count = 0
     pfrag = 0
     n = 0
-    while (type(stop_condition) == int and n < stop_condition) or (
-        callable(stop_condition)
-        and (not stop_condition(n, pfrag, stop_condition_settings))
+    while (
+        type(stop_condition) == int
+        and n < stop_condition
+        or (
+            callable(stop_condition)
+            and not stop_condition(n, pfrag, stop_condition_settings)
+        )
     ):
         if len(signature(fragment).parameters) == 2:
             G_ = fragment(G, fragment_settings)
@@ -64,15 +68,15 @@ def bisection(
     max_iterations: int = 1000000,
     debug: bool = False,
 ) -> Tuple[float, int]:
-    eps = 1 - (1 - error_probability) ** (
-        1 / steps
-    )  # Compute the upper bond of error for one bisection step from the upper bond of making a mistake in the entire process
+    # Compute the upper bond of error for one bisection step from the upper bond of making a mistake in the entire process
+    eps = 1 - (1 - error_probability) ** (1 / steps)
     lower_bound = 0
     upper_bound = 1
     step_count = 0
     while step_count < steps:
         middle = (lower_bound + upper_bound) / 2
         step_count += 1
+        fragment_settings["fragmentation"] = middle
         pfrag, iteration_count = get_framentation_probability(
             G,
             bisection_stop_condition,

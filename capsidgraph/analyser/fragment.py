@@ -3,9 +3,9 @@ import random
 from typing import Dict, List
 
 
-def probability_removal(G: nx.Graph, settings: Dict) -> nx.Graph:
+def probability_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
     G_ = G.copy()
-    p = settings.get("fragmentation_probability", 0.5)
+    p = settings["fragmentation"]
     fragmentation_type = settings.get("fragmentation_type", "nodes")
     if fragmentation_type == "nodes":
         # Remove each nodes with probability p
@@ -20,7 +20,7 @@ def probability_removal(G: nx.Graph, settings: Dict) -> nx.Graph:
     return G_
 
 
-def energy_bonds_removal(G: nx.Graph, settings: dict) -> nx.Graph:
+def energy_edges_fragment(G: nx.Graph, settings: dict) -> nx.Graph:
     # Get the attributes of the edges of the graph
     bond_energy = nx.get_edge_attributes(G, "energy")
     edges = list(G.edges)
@@ -33,7 +33,7 @@ def energy_bonds_removal(G: nx.Graph, settings: dict) -> nx.Graph:
     remaining_nodes = list(G_.edges)
     removed_edges = []
     remainig_edges_weights = weights.copy()
-    energy = settings["fragmentation_energy"]
+    energy = settings["fragmentation"]
 
     while energy > min_bond_energy:
         i = None
@@ -95,14 +95,14 @@ def _remove_node(
         removed_nodes.append(neighbour)
 
 
-def energy_nodes_removal(G: nx.Graph, settings: Dict) -> nx.Graph:
+def energy_nodes_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
     weights = []
     for e in G.nodes:
         weights.append(1 / G.nodes[e]["energy"])
     G_ = G.copy()
     remaining_nodes = list(G_.nodes)
     removed_nodes = []
-    energy = settings["fragmentation_energy"]
+    energy = settings["fragmentation"]
 
     min_node_energy = 1 / max(weights)
 

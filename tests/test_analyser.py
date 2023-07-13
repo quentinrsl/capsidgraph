@@ -5,9 +5,9 @@ from capsidgraph.analyser.analyse import (
     get_framentation_probability,
 )
 from capsidgraph.analyser.fragment import (
-    probability_removal as probability_fragment,
-    energy_bonds_removal,
-    energy_nodes_removal,
+    probability_fragment,
+    energy_edges_fragment,
+    energy_nodes_fragment,
 )
 from capsidgraph.analyser.util import init_nodes_energy
 
@@ -16,17 +16,17 @@ class TestAnalyser(unittest.TestCase):
     def test_fragment_probability(self):
         G = nx.read_adjlist("tests/testcase1.adjlist")
         G_ = probability_fragment(
-            G, {"fragmentation_probability": 0.5, "fragmentation_type": "nodes"}
+            G, {"fragmentation": 0.5, "fragmentation_type": "nodes"}
         )
         self.assertLessEqual(len(G_.nodes), len(G.nodes))
 
         G_ = probability_fragment(
-            G, {"fragmentation_probability": 1, "fragmentation_type": "edges"}
+            G, {"fragmentation": 1, "fragmentation_type": "edges"}
         )
         self.assertTrue(nx.is_empty(G_))
         self.assertEqual(len(G_.nodes), 72)
         G_ = probability_fragment(
-            G, {"fragmentation_probability": 1, "fragmentation_type": "nodes"}
+            G, {"fragmentation": 1, "fragmentation_type": "nodes"}
         )
         self.assertEqual(len(G_.nodes), 0)
 
@@ -48,7 +48,7 @@ class TestAnalyser(unittest.TestCase):
             1000,
             probability_fragment,
             fragment_settings={
-                "fragmentation_probability": 0.5,
+                "fragmentation": 0.5,
                 "fragmentation_type": "nodes",
             },
         )
@@ -62,7 +62,7 @@ class TestAnalyser(unittest.TestCase):
             probability_fragment,
             stop_condition_settings={"error_probability": 0.01, "min_iterations": 100},
             fragment_settings={
-                "fragmentation_probability": 0.5,
+                "fragmentation": 0.5,
                 "fragmentation_type": "nodes",
             },
         )
@@ -84,7 +84,7 @@ class TestAnalyser(unittest.TestCase):
         G = nx.read_adjlist("tests/testcase1.adjlist")
         nx.set_edge_attributes(G, 1 / len(G.edges), "energy")
         energy = 0.6
-        G_ = energy_bonds_removal(G, {"fragmentation_energy": energy})
+        G_ = energy_edges_fragment(G, {"fragmentation": energy})
         remaining_energy = 0
         for e in G_.edges:
             remaining_energy += G_.edges[e]["energy"]
@@ -95,7 +95,7 @@ class TestAnalyser(unittest.TestCase):
         nx.set_edge_attributes(G, 1 / len(G.edges), "energy")
         init_nodes_energy(G)
         fragmentation_energy = 0.5
-        G_ = energy_nodes_removal(G, {"fragmentation_energy": fragmentation_energy})
+        G_ = energy_nodes_fragment(G, {"fragmentation": fragmentation_energy})
         remaining_energy = 0
         for e in G_.edges:
             remaining_energy += G_.edges[e]["energy"]
