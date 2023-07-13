@@ -104,6 +104,7 @@ h = 1
 k = 2
 [edges,Tx,Ty,Tscale] = P
 faceEdges, axis = createFaceEdges(edges,Tx,Ty,h,k)
+print(faceEdges,axis)
 print("T=",Tscale * (h * h + h * k + k * k))
 G = createCapsidGraph(faceEdges,axis)
 nx.draw_kamada_kawai(G,node_size=5)
