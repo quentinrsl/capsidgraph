@@ -1,6 +1,6 @@
 from typing import List,Dict,Tuple,Callable
 import networkx as nx
-from util.types import *
+from capsidgraph.util.types import *
 
 #Precision value to prevent floating point errors
 eps = 1e-5
@@ -9,7 +9,7 @@ eps = 1e-5
 def get_point_id(coordinates:Dict[int,List[Tuple[int,int,int]]],x:int,y:int,face_id:int|None=None)->int:
     for id in coordinates:
         for (comp_face_id,compx,compy) in coordinates[id]:
-            if(abs(compx-x) < eps and abs(compy-y) < eps and (comp_face_id == None or comp_face_id == face_id)):
+            if(abs(compx-x) < eps and abs(compy-y) < eps and (face_id == None or comp_face_id == face_id)):
                 return id
     return -1
 #Crée le graph d'une face a partir de segments, 

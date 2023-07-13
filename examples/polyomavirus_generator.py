@@ -1,5 +1,5 @@
 from capsidgraph.graph_generator import createCapsidGraph
-
+import networkx as nx
 
 #Create the capsid of the polyomavirus with given energy on a, b and c edges
 def createPolyomavirusCapsid(Ea,Eb,Ec):
@@ -22,4 +22,3 @@ def createPolyomavirusCapsid(Ea,Eb,Ec):
     axis = ((0, 0), (2, 1), (3, -2))
 
     energy =   [Ec,Eb,Eb,Ec,Ea,Ec,Eb,Ec,Ea,Ec,Ec,Eb,Eb,Ea,Eb]
-    return createCapsidGraph(faceEdges,axis,bondStrength=energy)

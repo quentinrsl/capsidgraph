@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 import networkx as nx
-from util.types import *
-from generator.face.util import *
+from capsidgraph.util.types import *
+from capsidgraph.generator.face.util import *
 
 def rotate_point(P:Point,A:Point,cockwise:bool)->Point:
 	if(not cockwise):

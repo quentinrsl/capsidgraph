@@ -150,7 +150,6 @@ def createCapsidGraph(faceEdges:List[Edge],triangleVertices:Tuple[Point,Point,Po
 				if(abs(compx-x) < eps and abs(compy-y) < eps and compFaceId == faceId):
 					return id
 		return -1
-
 	#Merge two faces in the graph
 	#This function takes the face with id "id1", rotated it clockwise / anticlocksie around the vertex of the triangle with vertexId (0,1 or 2)
 	#Then matches the points of this rotated face with the face with id "id2" and merges the point that have the same coordinates
