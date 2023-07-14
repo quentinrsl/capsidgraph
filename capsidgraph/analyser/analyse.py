@@ -122,7 +122,8 @@ def get_fragment_size_distribution(
             max_size = max(size, max_size)
             fragments_size[size] = fragments_size.get(size, 0) + 1
     return [
-        fragments_size[i] if i in fragments_size else 0 for i in range(max_size - 1)
+        fragments_size[i] / iterations if i in fragments_size else 0
+        for i in range(max_size + 1)
     ]
 
 
@@ -157,7 +158,7 @@ def get_hole_size_distribution(
     iterations: int,
     fragment: Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None],
     fragment_settings: Dict | None = None,
-):
+) -> List[float]:
     # Initialize the list of hole sizes
     holes_size = {}
     # For each iteration
@@ -168,4 +169,7 @@ def get_hole_size_distribution(
             G_ = fragment(G)
         m = _get_hole_size(G_, G)
         holes_size[m] = holes_size.get(m, 0) + 1
-    return holes_size
+    return [
+        holes_size[i] / iterations if i in holes_size else 0
+        for i in range(max(holes_size.keys()) + 1)
+    ]

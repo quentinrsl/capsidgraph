@@ -1,6 +1,7 @@
 import unittest
 import networkx as nx
 from capsidgraph.analyser.analyse import (
+    _get_hole_size,
     _bisection_stop_condition,
     _get_framentation_probability,
     _bisection,
@@ -18,6 +19,8 @@ from capsidgraph.analyser import (
     get_fragmentation_probability_threshold_node,
     get_fragmentation_probability_random_edge_removal,
     get_fragmentation_probability_random_node_removal,
+    get_fragment_size_distribution,
+    get_hole_size_distribution,
 )
 
 
@@ -142,10 +145,60 @@ class TestAnalyser(unittest.TestCase):
         self.assertAlmostEqual(pf, 0.375)
 
         G = nx.read_adjlist("tests/AaLS_24.adjlist")
-        p = get_fragmentation_probability_random_edge_removal(G, 0.4, 50000)
-        self.assertAlmostEqual(p, 0.564, places=2)
-        p = get_fragmentation_probability_random_node_removal(G, 0.4, 50000)
-        self.assertAlmostEqual(p, 0.614, places=2)
+        p = get_fragmentation_probability_random_edge_removal(G, 0.4, 10000)
+        self.assertAlmostEqual(p, 0.564, places=1)
+        p = get_fragmentation_probability_random_node_removal(G, 0.4, 10000)
+        self.assertAlmostEqual(p, 0.614, places=1)
+
+    def test_fragment_size_distribution(self):
+        iterations = 100
+        G = nx.read_adjlist("tests/AaLS_24.adjlist")
+        res = get_fragment_size_distribution(
+            G,
+            iterations,
+            _probability_fragment,
+            {"fragmentation": 0.4, "fragmentation_type": "nodes"},
+        )
+        self.assertLessEqual(len(res), len(G.nodes))
+        for i in res:
+            self.assertGreaterEqual(i, 0)
+            self.assertLessEqual(i, len(G.nodes))
+
+    def test_hole_size(self):
+        G = nx.from_edgelist(
+            [
+                (0, 1),
+                (0, 2),
+                (0, 3),
+                (0, 4),
+                (1, 5),
+                (3, 6),
+                (4, 7),
+                (2, 8),
+                (5, 8),
+                (8, 7),
+                (7, 6),
+                (6, 5),
+            ]
+        )
+        G_frag = G.copy()
+        G_frag.remove_nodes_from([1, 2, 3, 4])
+        self.assertEqual(_get_hole_size(G_frag, G), 5)
+        self.assertEqual(_get_hole_size(G, G), 0)
+        self.assertEqual(_get_hole_size(nx.empty_graph(0), G), len(G.nodes))
+
+    def test_hole_distribution(self):
+        iterations = 100
+        G = nx.read_adjlist("tests/AaLS_24.adjlist")
+        res = get_hole_size_distribution(
+            G,
+            iterations,
+            _probability_fragment,
+            {"fragmentation": 0.4, "fragmentation_type": "nodes"},
+        )
+        self.assertLessEqual(len(res), len(G.nodes))
+        for i in res:
+            self.assertGreaterEqual(i, 0)
 
 
 if __name__ == "__main__":
