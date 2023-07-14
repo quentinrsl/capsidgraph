@@ -34,7 +34,6 @@ def energy_edges_fragment(G: nx.Graph, settings: dict) -> nx.Graph:
     removed_edges = []
     remainig_edges_weights = weights.copy()
     energy = settings["fragmentation"]
-
     while energy > min_bond_energy:
         i = None
         # randomly pick a bond if there are any left, if the energy of the bond picked is higher than the percolationEnergy left, pick another one.

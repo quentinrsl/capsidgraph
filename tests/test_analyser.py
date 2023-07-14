@@ -3,6 +3,7 @@ import networkx as nx
 from capsidgraph.analyser.analyse import (
     bisection_stop_condition,
     get_framentation_probability,
+    bisection,
 )
 from capsidgraph.analyser.fragment import (
     probability_fragment,
@@ -107,7 +108,17 @@ class TestAnalyser(unittest.TestCase):
                 s += G.edges[(n, nei)]["energy"]
             self.assertEqual(G.nodes[n]["energy"], s)
 
-    # TODO: test bisection function
+    def test_bisection(self):
+        steps = 3
+        error_probability = 0.05
+        G = nx.read_edgelist("tests/testcase2.edgelist")
+        for e in G.edges:
+            G.edges[e]["energy"] = 1 / len(G.edges)
+        init_nodes_energy(G)
+        pf, n = bisection(G, steps, error_probability, energy_edges_fragment, fragment_settings={})
+        self.assertAlmostEqual(pf, 0.375)
+
+        
 
 
 if __name__ == "__main__":
