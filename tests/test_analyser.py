@@ -196,7 +196,7 @@ class TestAnalyser(unittest.TestCase):
             probability_fragment,
             {"fragmentation": 0.4, "fragmentation_type": "nodes"},
         )
-        self.assertLessEqual(len(res), len(G.nodes))
+        self.assertEquals(len(res), len(G.nodes) + 1)
         for i in res:
             self.assertGreaterEqual(i, 0)
 

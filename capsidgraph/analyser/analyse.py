@@ -171,5 +171,5 @@ def get_hole_size_distribution(
         holes_size[m] = holes_size.get(m, 0) + 1
     return [
         holes_size[i] / iterations if i in holes_size else 0
-        for i in range(max(holes_size.keys()) + 1)
+        for i in range(len(G.nodes) + 1)
     ]

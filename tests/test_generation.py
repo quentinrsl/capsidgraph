@@ -5,8 +5,8 @@ import numpy as np
 from capsidgraph.generator import create_icosahedral_face_edges
 from capsidgraph.generator import create_icosahedral_capsid_graph
 from capsidgraph.generator import create_cubic_capsid_graph
-from capsidgraph.generator.texture.icosahedral import create_texture
-from capsidgraph.generator.face.patterns import icosahedral_patterns as icosahedral_face
+from capsidgraph.generator import create_icosahedral_texture
+from capsidgraph.generator.face.patterns import icosahedral_patterns
 from math import sqrt
 
 
@@ -16,7 +16,7 @@ def energy_edge_match(e1, e2):
 
 class TestGeneration(unittest.TestCase):
     def test_create_icosahedral_face_edges(self):
-        pattern = icosahedral_face.PATTERN_333333
+        pattern = icosahedral_patterns.PATTERN_333333
         h = 1
         k = 2
         [edges, Tx, Ty, Tscale] = pattern
@@ -124,7 +124,7 @@ class TestGeneration(unittest.TestCase):
         self.assertTrue(nx.is_isomorphic(G1, G2, edge_match=energy_edge_match))
 
     def test_create_icosahedral_graph_floating(self):
-        P = icosahedral_face.PATTERN_6434
+        P = icosahedral_patterns.PATTERN_6434
         h = 1
         k = 2
         [edges, Tx, Ty, Tscale] = P
@@ -157,8 +157,8 @@ class TestGeneration(unittest.TestCase):
 
     def test_texture_generator(self):
         from PIL import Image
-        P = icosahedral_face.PATTERN_6434
-        img = create_texture(P, 2, 1)
+        P = icosahedral_patterns.PATTERN_6434
+        img = create_icosahedral_texture(P, 2, 1)
         img2 = Image.open("tests/test_texture.png")
         self.assertEqual(img.size, img2.size)
         self.assertEqual(img.mode, img2.mode)

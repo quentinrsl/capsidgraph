@@ -5,7 +5,7 @@ from .fragment import (
     energy_edges_fragment,
     energy_nodes_fragment,
 )
-from .util import _init_nodes_energy
+from .util import _init_nodes_energy as init_nodes_energy
 from typing import Tuple
 
 
@@ -42,7 +42,7 @@ def get_fragmentation_probability_energy_node_removal(
     G: nx.Graph, removal_energy: float, iterations: int
 ) -> float:
     G_ = G.copy()
-    _init_nodes_energy(G_)
+    init_nodes_energy(G_)
     pfrag, n = get_framentation_probability(
         G_,
         iterations,
@@ -141,7 +141,7 @@ def get_fragmentation_energy_threshold_node(
     debug: bool = False,
 ) -> Tuple[float, int]:
     G_ = G.copy()
-    _init_nodes_energy(G_)
+    init_nodes_energy(G_)
     pf, n = bisection(
         G_,
         steps,
