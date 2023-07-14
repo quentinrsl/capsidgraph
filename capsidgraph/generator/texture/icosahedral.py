@@ -1,6 +1,8 @@
-from graph_generator import *
+from ..face.icosahedral import create_triangle, extract_triangle
+from ..face.util import extend
 from math import sqrt,cos,sin,atan2
 from PIL import Image, ImageDraw
+from typing import List, Tuple
 
 Point = Tuple[float,float]
 Edge = Tuple[Point,Point]
@@ -22,13 +24,12 @@ def rotate(P:Point,theta:float)->Point:
     )
 
 #return the image of an icosahedral face of the capsid
-def getFaceImage(pattern:Tuple[List[Edge],Point,Point,int],h:int,k:int,lineWidth:float=10,lineColor:Tuple[int,int,int]=(0,0,0),scale:float=500)->Image:
-
+def create_image(pattern:Tuple[List[Edge],Point,Point,int],h:int,k:int,lineWidth:float=10,lineColor:Tuple[int,int,int]=(0,0,0),scale:float=500)->Image:
     #Get the required data to generate the tiling
     [edges, Tx, Ty] = pattern[:3]
     
     #Coordinates of the triangle to cut into the tiling
-    A,B,C = createTriangle(h,k,Tx,Ty)
+    A,B,C = create_triangle(h,k,Tx,Ty)
     theta= atan2(carth(B)[0],carth(B)[1])   #Angle by which we need to rotate the image to get the right orientation
     #width and height of the final image
     width = int(rotate(carth(C),theta)[0]) * scale
@@ -39,7 +40,7 @@ def getFaceImage(pattern:Tuple[List[Edge],Point,Point,int],h:int,k:int,lineWidth
     for i in range(h+k):
         edges = extend(edges,Ty)
     #Get the list of extyracted lines
-    edges = extractTriangle(edges,h,k,Tx,Ty)
+    edges = extract_triangle(edges,h,k,Tx,Ty)
     
     #Convert them back into carthesian coordinates and rotate them
     carthEdges = []

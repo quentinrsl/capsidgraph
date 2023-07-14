@@ -1,9 +1,11 @@
 import unittest
 import networkx as nx
+import numpy as np
 
 from capsidgraph.generator import create_icosahedral_face_edges
 from capsidgraph.generator import create_icosahedral_capsid_graph
 from capsidgraph.generator import create_cubic_capsid_graph
+from capsidgraph.generator.texture.icosahedral import create_image
 from math import sqrt
 
 def energy_edge_match(e1,e2):
@@ -111,8 +113,37 @@ class TestGeneration(unittest.TestCase):
         G1 = create_cubic_capsid_graph(face,square_vertices,w)
         G2 = nx.read_edgelist("tests/testcase4.edgelist")
         nx.is_isomorphic(G1,G2,edge_match=energy_edge_match)
-
-
+    
+    def test_texture_generator(self):
+        IS3 = 1/sqrt(3)
+        P = [
+                [
+                    ((1,0),(0,1)),
+                    ((0,1),(-1,1)),
+                    ((-1,1),(-1,0)),
+                    ((-1,0),(0,-1)),
+                    ((0,-1),(1,-1)),
+                    ((1,-1),(1,0)),  
+                    ((0,1),(-IS3,1+2*IS3)),
+                    ((1,0),(1+IS3,IS3)),
+                    ((0,1),(IS3,1+IS3)),
+                    ((-1,1),(-1-IS3,1+2*IS3)),
+                    ((1,0),(2*IS3+1,-IS3)),
+                    ((1,-1),(2*IS3+1,-1-IS3)),
+                ],
+                (1+IS3,1+IS3),
+                (-1-IS3, 2+2*IS3),
+                3
+        ]
+        from PIL import Image
+        img = create_image(P, 2, 1)
+        img2 = Image.open("tests/test_texture.png")
+        self.assertEqual(img.size,img2.size)
+        self.assertEqual(img.mode,img2.mode)
+        #test that pixels are the same
+        img_matrix = np.asarray(img)
+        img2_matrix = np.asarray(img2)
+        self.assertTrue(np.all(img_matrix == img2_matrix))
 
 
 if __name__ == '__main__':

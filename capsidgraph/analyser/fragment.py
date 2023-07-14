@@ -6,7 +6,7 @@ from typing import Dict, List
 def probability_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
     G_ = G.copy()
     p = settings["fragmentation"]
-    fragmentation_type = settings.get("fragmentation_type", "nodes")
+    fragmentation_type = settings["fragmentation_type"]
     if fragmentation_type == "nodes":
         # Remove each nodes with probability p
         for node in G.nodes:

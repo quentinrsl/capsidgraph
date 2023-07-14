@@ -141,6 +141,12 @@ class TestAnalyser(unittest.TestCase):
         pf, n = get_fragmentation_probability_threshold_node(G, 0.1, 3)
         self.assertAlmostEqual(pf, 0.375)
 
+        G = nx.read_adjlist("tests/AaLS_24.adjlist")
+        p = get_fragmentation_probability_random_edge_removal(G, 0.4,50000)
+        self.assertAlmostEqual(p, 0.564, places=2) 
+        p = get_fragmentation_probability_random_node_removal(G, 0.4,50000)
+        self.assertAlmostEqual(p, 0.614, places=2) 
+
 
 if __name__ == "__main__":
     unittest.main()
