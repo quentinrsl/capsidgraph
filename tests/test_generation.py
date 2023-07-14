@@ -6,6 +6,7 @@ from capsidgraph.generator import create_icosahedral_face_edges
 from capsidgraph.generator import create_icosahedral_capsid_graph
 from capsidgraph.generator import create_cubic_capsid_graph
 from capsidgraph.generator.texture.icosahedral import create_texture
+from capsidgraph.generator.face.patterns import icosahedral_patterns as icosahedral_face
 from math import sqrt
 
 
@@ -15,19 +16,7 @@ def energy_edge_match(e1, e2):
 
 class TestGeneration(unittest.TestCase):
     def test_create_icosahedral_face_edges(self):
-        pattern = [
-            [
-                ((0, 0), (0, 1)),
-                ((0, 0), (-1, 1)),
-                ((0, 0), (-1, 0)),
-                ((0, 0), (0, -1)),
-                ((0, 0), (1, -1)),
-                ((0, 0), (1, 0)),
-            ],
-            (1, 0),
-            (0, 1),
-            1,
-        ]
+        pattern = icosahedral_face.PATTERN_333333
         h = 1
         k = 2
         [edges, Tx, Ty, Tscale] = pattern
@@ -135,26 +124,7 @@ class TestGeneration(unittest.TestCase):
         self.assertTrue(nx.is_isomorphic(G1, G2, edge_match=energy_edge_match))
 
     def test_create_icosahedral_graph_floating(self):
-        IS3 = 1 / sqrt(3)
-        P = [
-            [
-                ((1, 0), (0, 1)),
-                ((0, 1), (-1, 1)),
-                ((-1, 1), (-1, 0)),
-                ((-1, 0), (0, -1)),
-                ((0, -1), (1, -1)),
-                ((1, -1), (1, 0)),
-                ((0, 1), (-IS3, 1 + 2 * IS3)),
-                ((1, 0), (1 + IS3, IS3)),
-                ((0, 1), (IS3, 1 + IS3)),
-                ((-1, 1), (-1 - IS3, 1 + 2 * IS3)),
-                ((1, 0), (2 * IS3 + 1, -IS3)),
-                ((1, -1), (2 * IS3 + 1, -1 - IS3)),
-            ],
-            (1 + IS3, 1 + IS3),
-            (-1 - IS3, 2 + 2 * IS3),
-            3,
-        ]
+        P = icosahedral_face.PATTERN_6434
         h = 1
         k = 2
         [edges, Tx, Ty, Tscale] = P
@@ -186,28 +156,8 @@ class TestGeneration(unittest.TestCase):
         nx.is_isomorphic(G1, G2, edge_match=energy_edge_match)
 
     def test_texture_generator(self):
-        IS3 = 1 / sqrt(3)
-        P = [
-            [
-                ((1, 0), (0, 1)),
-                ((0, 1), (-1, 1)),
-                ((-1, 1), (-1, 0)),
-                ((-1, 0), (0, -1)),
-                ((0, -1), (1, -1)),
-                ((1, -1), (1, 0)),
-                ((0, 1), (-IS3, 1 + 2 * IS3)),
-                ((1, 0), (1 + IS3, IS3)),
-                ((0, 1), (IS3, 1 + IS3)),
-                ((-1, 1), (-1 - IS3, 1 + 2 * IS3)),
-                ((1, 0), (2 * IS3 + 1, -IS3)),
-                ((1, -1), (2 * IS3 + 1, -1 - IS3)),
-            ],
-            (1 + IS3, 1 + IS3),
-            (-1 - IS3, 2 + 2 * IS3),
-            3,
-        ]
         from PIL import Image
-
+        P = icosahedral_face.PATTERN_6434
         img = create_texture(P, 2, 1)
         img2 = Image.open("tests/test_texture.png")
         self.assertEqual(img.size, img2.size)
