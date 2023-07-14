@@ -1,4 +1,4 @@
-from capsidgraph.util.types import *
+from capsidgraph.util.types import Edge, Point
 from typing import Dict, List, Tuple
 import networkx as nx
 

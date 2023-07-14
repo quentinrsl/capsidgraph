@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 import networkx as nx
-from capsidgraph.util.types import *
-from capsidgraph.generator.face.util import *
+from capsidgraph.util.types import Edge, Point, Vector2D
+from capsidgraph.generator.face.util import is_under_line, extend
 
 
 def rotate_point(P: Point, A: Point, cockwise: bool) -> Point:

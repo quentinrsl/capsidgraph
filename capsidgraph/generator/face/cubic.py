@@ -1,4 +1,4 @@
-from capsidgraph.util.types import *
+from capsidgraph.util.types import Point
 
 
 def rotate_point(P: Point, A: Point, cockwise: bool) -> Point:

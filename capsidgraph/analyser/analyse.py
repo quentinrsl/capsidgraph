@@ -4,7 +4,7 @@ from typing import List, Tuple, Dict, Callable
 from inspect import signature
 
 
-def bisection_stop_condition(n: int, pfrag: float, settings: Dict) -> bool:
+def _bisection_stop_condition(n: int, pfrag: float, settings: Dict) -> bool:
     INV_PROBA = 1 / settings["error_probability"]
     max_iterations = settings.get("max_iterations", 1000000)
     min_iterations = settings.get("min_iterations", 1000)
@@ -13,7 +13,7 @@ def bisection_stop_condition(n: int, pfrag: float, settings: Dict) -> bool:
     )
 
 
-def get_framentation_probability(
+def _get_framentation_probability(
     G: nx.Graph,
     stop_condition: int | Callable[[int, float, Dict], bool],
     fragment: Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None],
@@ -58,7 +58,7 @@ def get_framentation_probability(
     return pfrag, n
 
 
-def bisection(
+def _bisection(
     G: nx.Graph,
     steps: int,
     error_probability: float,
@@ -77,9 +77,9 @@ def bisection(
         middle = (lower_bound + upper_bound) / 2
         step_count += 1
         fragment_settings["fragmentation"] = middle
-        pfrag, iteration_count = get_framentation_probability(
+        pfrag, iteration_count = _get_framentation_probability(
             G,
-            bisection_stop_condition,
+            _bisection_stop_condition,
             fragment,
             stop_condition_settings={
                 "error_probability": eps,

@@ -5,7 +5,7 @@ from typing import List
 # intialize weights on nodes
 # Create weight on nodes based on the sum of the energy of the bonds attached to it
 # Ignore nodes that are in the blacklist (act if they were removed)hist
-def init_nodes_energy(G: nx.Graph) -> List[float]:
+def _init_nodes_energy(G: nx.Graph) -> List[float]:
     # Compute node weights
     for node in G.nodes():
         energy = 0

@@ -1,13 +1,13 @@
 from typing import List, Dict, Tuple, Callable
 import networkx as nx
-from capsidgraph.util.types import *
+from capsidgraph.util.types import Edge, Point
 
 # Precision value to prevent floating point errors
 eps = 1e-5
 
 
 # Returns the id of a given point if it exists, -1 otherwise
-def get_point_id(
+def _get_point_id(
     coordinates: Dict[int, List[Tuple[int, int, int]]],
     x: int,
     y: int,
@@ -30,7 +30,7 @@ def get_point_id(
 # The ID of the nodes of the graph starts at startId
 # Returns the graph and a dictionary saving to which node belong to which face (to each node id is linked an array of face Ids)
 # This dictionary is initialized whith every nodes of the graph only belonging to the face faceId
-def create_face_graph(
+def _create_face_graph(
     edges: List[Edge], face_id: int, start_id: int, bond_strength: List[float] = None
 ) -> Tuple[nx.Graph, Dict]:
     face_graph = nx.Graph()
@@ -39,7 +39,7 @@ def create_face_graph(
     current_id = start_id
     for edge in edges:
         for x, y in edge:
-            if get_point_id(face_coordinates, x, y) == -1:
+            if _get_point_id(face_coordinates, x, y) == -1:
                 face_graph.add_node(current_id)
                 face_coordinates[current_id] = [(face_id, x, y)]
                 current_id += 1
@@ -51,8 +51,8 @@ def create_face_graph(
             w = bond_strength[i]
         else:
             w = 1
-        id1 = get_point_id(face_coordinates, x1, y1)
-        id2 = get_point_id(face_coordinates, x2, y2)
+        id1 = _get_point_id(face_coordinates, x1, y1)
+        id2 = _get_point_id(face_coordinates, x2, y2)
         face_graph.add_edge(id1, id2, energy=w)
     return face_graph, face_coordinates
 
@@ -81,7 +81,7 @@ def merge_faces(
                 rx, ry = rotate_point(
                     (x, y), face_vertices[vertex_id], clockwise
                 )  # Rotate it by PI/3 in the right direction
-                rid = get_point_id(
+                rid = _get_point_id(
                     coordinates, rx, ry, face_id=id2
                 )  # Search for points in "id2" that would have the coordinate of this rotated point
                 if rid != -1 and rid not in nodes_to_remove:  # We found a point

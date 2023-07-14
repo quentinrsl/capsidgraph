@@ -1,17 +1,21 @@
 import networkx as nx
-from .analyse import get_framentation_probability, bisection
-from .fragment import probability_fragment, energy_edges_fragment, energy_nodes_fragment
-from .util import init_nodes_energy
+from .analyse import _get_framentation_probability, _bisection
+from .fragment import (
+    _probability_fragment,
+    _energy_edges_fragment,
+    _energy_nodes_fragment,
+)
+from .util import _init_nodes_energy
 from typing import Tuple
 
 
 def get_fragmentation_probability_random_node_removal(
     G: nx.Graph, removal_probability: float, iterations: int
 ) -> float:
-    pfrag, n = get_framentation_probability(
+    pfrag, n = _get_framentation_probability(
         G,
         iterations,
-        probability_fragment,
+        _probability_fragment,
         fragment_settings={
             "fragmentation": removal_probability,
             "fragmentation_type": "nodes",
@@ -23,10 +27,10 @@ def get_fragmentation_probability_random_node_removal(
 def get_fragmentation_probability_random_edge_removal(
     G: nx.Graph, removal_probability: float, iterations: int
 ) -> float:
-    pfrag, n = get_framentation_probability(
+    pfrag, n = _get_framentation_probability(
         G,
         iterations,
-        probability_fragment,
+        _probability_fragment,
         fragment_settings={
             "fragmentation": removal_probability,
             "fragmentation_type": "edges",
@@ -44,11 +48,11 @@ def get_fragmentation_probability_threshold_node(
     max_iterations: int = 1000000,
     debug: bool = False,
 ) -> Tuple[float, int]:
-    pf, n = bisection(
+    pf, n = _bisection(
         G,
         steps,
         error_probability,
-        probability_fragment,
+        _probability_fragment,
         fragment_settings={"fragmentation_type": "nodes"},
         min_iterations=min_iterations,
         max_iterations=max_iterations,
@@ -65,11 +69,11 @@ def get_fragmentation_probability_threshold_edge(
     max_iterations: int = 1000000,
     debug: bool = False,
 ) -> Tuple[float, int]:
-    pf, n = bisection(
+    pf, n = _bisection(
         G,
         steps,
         error_probability,
-        probability_fragment,
+        _probability_fragment,
         fragment_settings={"fragmentation_type": "edges"},
         min_iterations=min_iterations,
         max_iterations=max_iterations,
@@ -86,11 +90,11 @@ def get_fragmentation_energy_threshold_edge(
     max_iterations: int = 1000000,
     debug: bool = False,
 ) -> Tuple[float, int]:
-    pf, n = bisection(
+    pf, n = _bisection(
         G,
         steps,
         error_probability,
-        energy_edges_fragment,
+        _energy_edges_fragment,
         fragment_settings={},
         min_iterations=min_iterations,
         max_iterations=max_iterations,
@@ -108,12 +112,12 @@ def get_fragmentation_energy_threshold_node(
     debug: bool = False,
 ) -> Tuple[float, int]:
     G_ = G.copy()
-    init_nodes_energy(G_)
-    pf, n = bisection(
+    _init_nodes_energy(G_)
+    pf, n = _bisection(
         G_,
         steps,
         error_probability,
-        energy_nodes_fragment,
+        _energy_nodes_fragment,
         fragment_settings={},
         min_iterations=min_iterations,
         max_iterations=max_iterations,

@@ -3,7 +3,7 @@ import random
 from typing import Dict, List
 
 
-def probability_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
+def _probability_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
     G_ = G.copy()
     p = settings["fragmentation"]
     fragmentation_type = settings["fragmentation_type"]
@@ -20,7 +20,7 @@ def probability_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
     return G_
 
 
-def energy_edges_fragment(G: nx.Graph, settings: dict) -> nx.Graph:
+def _energy_edges_fragment(G: nx.Graph, settings: dict) -> nx.Graph:
     # Get the attributes of the edges of the graph
     bond_energy = nx.get_edge_attributes(G, "energy")
     edges = list(G.edges)
@@ -94,7 +94,7 @@ def _remove_node(
         removed_nodes.append(neighbour)
 
 
-def energy_nodes_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
+def _energy_nodes_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
     weights = []
     for e in G.nodes:
         weights.append(1 / G.nodes[e]["energy"])

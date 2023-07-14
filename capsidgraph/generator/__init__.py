@@ -2,11 +2,15 @@ import networkx as nx
 from capsidgraph.util.types import *
 from typing import List, Tuple, Dict
 
-from .face.icosahedral import rotate_point as rotate_icosahedral_point
-from .face.cubic import rotate_point as rotate_cubic_point
-from .merger import merge_faces, create_face_graph
-
+from .face.icosahedral import rotate_point as _rotate_icosahedral_point
 from .face.icosahedral import create_face_edges as create_icosahedral_face_edges
+from .face.cubic import rotate_point as _rotate_cubic_point
+
+from .merger import merge_faces, _create_face_graph
+
+from .exceptions import GraphCreationException
+
+from .texture.icosahedral import create_texture as create_icosahedral_texture
 
 
 def create_icosahedral_capsid_graph(
@@ -15,13 +19,13 @@ def create_icosahedral_capsid_graph(
     bond_strength: List[float] | None = None,
 ) -> nx.Graph:
     if bond_strength != None and 0 in bond_strength:
-        raise Exception("Bond cannot have 0 energy")
+        raise GraphCreationException("Bond cannot have 0 energy")
     G = nx.Graph()
     coordinates = {}
     node_id = 0
     # We then build the capsid by creating 20 triangular faces
     for face_id in range(20):
-        face, face_coordinates = create_face_graph(
+        face, face_coordinates = _create_face_graph(
             faceEdges, face_id, node_id, bond_strength=bond_strength
         )
         node_id += len(face.nodes)
@@ -34,7 +38,7 @@ def create_icosahedral_capsid_graph(
         G = merge_faces(
             G,
             coordinates,
-            rotate_icosahedral_point,
+            _rotate_icosahedral_point,
             triangle_certices,
             2 * i,
             2 * i + 1,
@@ -45,7 +49,7 @@ def create_icosahedral_capsid_graph(
         G = merge_faces(
             G,
             coordinates,
-            rotate_icosahedral_point,
+            _rotate_icosahedral_point,
             triangle_certices,
             2 * i + 1,
             (2 * i + 2) % 10,
@@ -57,7 +61,7 @@ def create_icosahedral_capsid_graph(
         G = merge_faces(
             G,
             coordinates,
-            rotate_icosahedral_point,
+            _rotate_icosahedral_point,
             triangle_certices,
             i,
             10 + i,
@@ -70,7 +74,7 @@ def create_icosahedral_capsid_graph(
         G = merge_faces(
             G,
             coordinates,
-            rotate_icosahedral_point,
+            _rotate_icosahedral_point,
             triangle_certices,
             10 + i,
             10 + ((i + 2) % 10),
@@ -86,29 +90,37 @@ def create_cubic_capsid_graph(
     bond_strength: List[float] | None = None,
 ) -> nx.Graph:
     if bond_strength != None and 0 in bond_strength:
-        raise Exception("Bond cannot have 0 energy")
+        raise GraphCreationException("Bond cannot have 0 energy")
     G = nx.Graph()
     coordinates = {}
     node_id = 0
     for face_id in range(6):
-        face, face_coordinates = create_face_graph(
+        face, face_coordinates = _create_face_graph(
             face_edges, face_id, node_id, bond_strength=bond_strength
         )
         node_id += len(face.nodes)
         G = nx.compose(G, face)
         coordinates.update(face_coordinates)
 
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 0, 1, 0, True)
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 1, 2, 2, False)
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 2, 3, 0, True)
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 3, 0, 2, False)
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 0, 4, 1, True)
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 4, 1, 2, False)
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 4, 2, 2, True)
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 4, 3, 3, True)
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 0, 5, 3, True)
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 5, 1, 1, True)
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 5, 2, 0, True)
-    G = merge_faces(G, coordinates, rotate_cubic_point, square_vertices, 5, 3, 0, False)
+    G = merge_faces(G, coordinates, _rotate_cubic_point, square_vertices, 0, 1, 0, True)
+    G = merge_faces(
+        G, coordinates, _rotate_cubic_point, square_vertices, 1, 2, 2, False
+    )
+    G = merge_faces(G, coordinates, _rotate_cubic_point, square_vertices, 2, 3, 0, True)
+    G = merge_faces(
+        G, coordinates, _rotate_cubic_point, square_vertices, 3, 0, 2, False
+    )
+    G = merge_faces(G, coordinates, _rotate_cubic_point, square_vertices, 0, 4, 1, True)
+    G = merge_faces(
+        G, coordinates, _rotate_cubic_point, square_vertices, 4, 1, 2, False
+    )
+    G = merge_faces(G, coordinates, _rotate_cubic_point, square_vertices, 4, 2, 2, True)
+    G = merge_faces(G, coordinates, _rotate_cubic_point, square_vertices, 4, 3, 3, True)
+    G = merge_faces(G, coordinates, _rotate_cubic_point, square_vertices, 0, 5, 3, True)
+    G = merge_faces(G, coordinates, _rotate_cubic_point, square_vertices, 5, 1, 1, True)
+    G = merge_faces(G, coordinates, _rotate_cubic_point, square_vertices, 5, 2, 0, True)
+    G = merge_faces(
+        G, coordinates, _rotate_cubic_point, square_vertices, 5, 3, 0, False
+    )
 
     return G
