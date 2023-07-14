@@ -1,4 +1,6 @@
 *.pyc
+__pycache__/
+.VSCodeCounter
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

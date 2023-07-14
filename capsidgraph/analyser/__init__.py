@@ -38,6 +38,35 @@ def get_fragmentation_probability_random_edge_removal(
     )
     return pfrag
 
+def get_fragmentation_probability_energy_node_removal(
+    G: nx.Graph, removal_energy: float, iterations: int
+) -> float:
+    G_ = G.copy()
+    _init_nodes_energy(G_)
+    pfrag, n = _get_framentation_probability(
+        G_,
+        iterations,
+        _energy_nodes_fragment,
+        fragment_settings={
+            "fragmentation": removal_energy,
+        },
+    )
+    return pfrag
+
+
+def get_fragmentation_probability_energy_edge_removal(
+    G: nx.Graph, removal_energy: float, iterations: int
+) -> float:
+    pfrag, n = _get_framentation_probability(
+        G,
+        iterations,
+        _energy_edges_fragment,
+        fragment_settings={
+            "fragmentation": removal_energy,
+        },
+    )
+    return pfrag
+
 
 # TODO: add tests for the wrappers
 def get_fragmentation_probability_threshold_node(
