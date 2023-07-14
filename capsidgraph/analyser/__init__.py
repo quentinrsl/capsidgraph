@@ -1,5 +1,5 @@
 import networkx as nx
-from .analyse import _get_framentation_probability, _bisection
+from .analyse import _get_framentation_probability, _bisection, get_fragment_size_distribution, get_hole_size_distribution
 from .fragment import (
     _probability_fragment,
     _energy_edges_fragment,

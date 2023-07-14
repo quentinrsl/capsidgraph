@@ -2,15 +2,7 @@ import time
 import networkx as nx
 from typing import List, Tuple, Dict, Callable
 from inspect import signature
-
-
-def _bisection_stop_condition(n: int, pfrag: float, settings: Dict) -> bool:
-    INV_PROBA = 1 / settings["error_probability"]
-    max_iterations = settings.get("max_iterations", 1000000)
-    min_iterations = settings.get("min_iterations", 1000)
-    return n >= min_iterations and (
-        4 * n * ((pfrag - 0.5) ** 2) >= INV_PROBA or n >= max_iterations
-    )
+import random
 
 
 def _get_framentation_probability(
@@ -52,10 +44,19 @@ def _get_framentation_probability(
             n,
             "got p(frag)=",
             pfrag,
-            1000 * (time.time() - start) / n,
+            000 * (time.time() - start) / n,
             "ms/sim",
         )
     return pfrag, n
+
+
+def _bisection_stop_condition(n: int, pfrag: float, settings: Dict) -> bool:
+    INV_PROBA = 1 / settings["error_probability"]
+    max_iterations = settings.get("max_iterations", 1000000)
+    min_iterations = settings.get("min_iterations", 1000)
+    return n >= min_iterations and (
+        4 * n * ((pfrag - 0.5) ** 2) >= INV_PROBA or n >= max_iterations
+    )
 
 
 def _bisection(
@@ -96,3 +97,75 @@ def _bisection(
         else:
             lower_bound = middle
     return middle, step_count
+
+
+# G is the graph to percolate on
+# p is the probability of removal of each nodes/edges
+# n is the number of iterations
+# fragtype is either "nodes" or "edges" and determine if edges or nodes are to be removed
+# Returns an array A where A[i] is the number of fragments with size i encountered
+def get_fragment_size_distribution(
+    G: nx.Graph,
+    iterations: int,
+    fragment: Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None],
+    fragment_settings: Dict | None = None,
+) -> List[float]:
+    fragments_size = {}
+    max_size = 0
+    for i in range(iterations):
+        if len(signature(fragment).parameters) == 2:
+            G_ = fragment(G, fragment_settings)
+        else:
+            G_ = fragment(G)
+        for component in nx.connected_components(G_):
+            size = len(component)
+            max_size = max(size, max_size)
+            fragments_size[size] = fragments_size.get(size, 0) + 1
+    return [
+        fragments_size[i] if i in fragments_size else 0 for i in range(max_size - 1)
+    ]
+
+
+# ===================
+# Hole Size Detection
+# ===================
+
+## Unweighted graphs
+
+
+def _get_hole_size(fragmneted_graph, original_graph):
+    connected_components = list(nx.connected_components(fragmneted_graph))
+    if len(connected_components) == 0:
+        return len(original_graph.nodes)
+    largest_component_size = len(max(connected_components, key=len))
+    largest_components = [
+        c for c in connected_components if len(c) == largest_component_size
+    ]
+    min_hole_size = None
+    for largest_component in largest_components:
+        hole = original_graph.subgraph(original_graph.nodes - largest_component)
+        if len(hole.nodes) == 0:
+            return 0
+        hole_size = len(max(nx.connected_components(hole), key=len))
+        if min_hole_size == None or hole_size < min_hole_size:
+            min_hole_size = hole_size
+    return min_hole_size
+
+
+def get_hole_size_distribution(
+    G: nx.Graph,
+    iterations: int,
+    fragment: Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None],
+    fragment_settings: Dict | None = None,
+):
+    # Initialize the list of hole sizes
+    holes_size = {}
+    # For each iteration
+    for i in range(iterations):
+        if len(signature(fragment).parameters) == 2:
+            G_ = fragment(G, fragment_settings)
+        else:
+            G_ = fragment(G)
+        m = _get_hole_size(G_, G)
+        holes_size[m] = holes_size.get(m, 0) + 1
+    return holes_size
