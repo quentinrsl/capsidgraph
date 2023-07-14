@@ -11,6 +11,14 @@ from capsidgraph.analyser.fragment import (
     energy_nodes_fragment,
 )
 from capsidgraph.analyser.util import init_nodes_energy
+from capsidgraph.analyser import (
+    get_fragmentation_energy_threshold_edge,
+    get_fragmentation_energy_threshold_node,
+    get_fragmentation_probability_threshold_edge,
+    get_fragmentation_probability_threshold_node,
+    get_fragmentation_probability_random_edge_removal,
+    get_fragmentation_probability_random_node_removal,
+)
 
 
 class TestAnalyser(unittest.TestCase):
@@ -115,10 +123,23 @@ class TestAnalyser(unittest.TestCase):
         for e in G.edges:
             G.edges[e]["energy"] = 1 / len(G.edges)
         init_nodes_energy(G)
-        pf, n = bisection(G, steps, error_probability, energy_edges_fragment, fragment_settings={})
+        pf, n = bisection(
+            G, steps, error_probability, energy_edges_fragment, fragment_settings={}
+        )
         self.assertAlmostEqual(pf, 0.375)
 
-        
+    def test_wrappers(self):
+        G = nx.read_edgelist("tests/testcase2.edgelist")
+        for e in G.edges:
+            G.edges[e]["energy"] = 1 / len(G.edges)
+        pf, n = get_fragmentation_energy_threshold_edge(G, 0.1, 3)
+        self.assertAlmostEqual(pf, 0.375)
+        pf,n = get_fragmentation_energy_threshold_node(G, 0.1, 3)
+        self.assertAlmostEqual(pf, 0.875)
+        pf, n = get_fragmentation_probability_threshold_edge(G, 0.1, 3)
+        self.assertAlmostEqual(pf, 0.375)
+        pf, n = get_fragmentation_probability_threshold_node(G, 0.1, 3)
+        self.assertAlmostEqual(pf, 0.375)
 
 
 if __name__ == "__main__":
