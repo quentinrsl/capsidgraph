@@ -3,13 +3,13 @@ import networkx as nx
 from capsidgraph.analyser.analyse import (
     _get_hole_size,
     _bisection_stop_condition,
-    _get_framentation_probability,
-    _bisection,
+    get_framentation_probability,
+    bisection,
 )
 from capsidgraph.analyser.fragment import (
-    _probability_fragment,
-    _energy_edges_fragment,
-    _energy_nodes_fragment,
+    probability_fragment,
+    energy_edges_fragment,
+    energy_nodes_fragment,
 )
 from capsidgraph.analyser.util import _init_nodes_energy
 from capsidgraph.analyser import (
@@ -27,17 +27,17 @@ from capsidgraph.analyser import (
 class TestAnalyser(unittest.TestCase):
     def test_fragment_probability(self):
         G = nx.read_adjlist("tests/testcase1.adjlist")
-        G_ = _probability_fragment(
+        G_ = probability_fragment(
             G, {"fragmentation": 0.5, "fragmentation_type": "nodes"}
         )
         self.assertLessEqual(len(G_.nodes), len(G.nodes))
 
-        G_ = _probability_fragment(
+        G_ = probability_fragment(
             G, {"fragmentation": 1, "fragmentation_type": "edges"}
         )
         self.assertTrue(nx.is_empty(G_))
         self.assertEqual(len(G_.nodes), 72)
-        G_ = _probability_fragment(
+        G_ = probability_fragment(
             G, {"fragmentation": 1, "fragmentation_type": "nodes"}
         )
         self.assertEqual(len(G_.nodes), 0)
@@ -55,10 +55,10 @@ class TestAnalyser(unittest.TestCase):
 
     def test_get_fragmentation_probability(self):
         G = nx.read_adjlist("tests/testcase1.adjlist")
-        pfrag, n = _get_framentation_probability(
+        pfrag, n = get_framentation_probability(
             G,
             1000,
-            _probability_fragment,
+            probability_fragment,
             fragment_settings={
                 "fragmentation": 0.5,
                 "fragmentation_type": "nodes",
@@ -68,10 +68,10 @@ class TestAnalyser(unittest.TestCase):
         self.assertGreater(pfrag, 0)
         self.assertEqual(n, 1000)
 
-        pfrag, n = _get_framentation_probability(
+        pfrag, n = get_framentation_probability(
             G,
             _bisection_stop_condition,
-            _probability_fragment,
+            probability_fragment,
             stop_condition_settings={"error_probability": 0.01, "min_iterations": 100},
             fragment_settings={
                 "fragmentation": 0.5,
@@ -96,7 +96,7 @@ class TestAnalyser(unittest.TestCase):
         G = nx.read_adjlist("tests/testcase1.adjlist")
         nx.set_edge_attributes(G, 1 / len(G.edges), "energy")
         energy = 0.6
-        G_ = _energy_edges_fragment(G, {"fragmentation": energy})
+        G_ = energy_edges_fragment(G, {"fragmentation": energy})
         remaining_energy = 0
         for e in G_.edges:
             remaining_energy += G_.edges[e]["energy"]
@@ -107,7 +107,7 @@ class TestAnalyser(unittest.TestCase):
         nx.set_edge_attributes(G, 1 / len(G.edges), "energy")
         _init_nodes_energy(G)
         fragmentation_energy = 0.5
-        G_ = _energy_nodes_fragment(G, {"fragmentation": fragmentation_energy})
+        G_ = energy_nodes_fragment(G, {"fragmentation": fragmentation_energy})
         remaining_energy = 0
         for e in G_.edges:
             remaining_energy += G_.edges[e]["energy"]
@@ -126,8 +126,8 @@ class TestAnalyser(unittest.TestCase):
         for e in G.edges:
             G.edges[e]["energy"] = 1 / len(G.edges)
         _init_nodes_energy(G)
-        pf, n = _bisection(
-            G, steps, error_probability, _energy_edges_fragment, fragment_settings={}
+        pf, n = bisection(
+            G, steps, error_probability, energy_edges_fragment, fragment_settings={}
         )
         self.assertAlmostEqual(pf, 0.375)
 
@@ -156,7 +156,7 @@ class TestAnalyser(unittest.TestCase):
         res = get_fragment_size_distribution(
             G,
             iterations,
-            _probability_fragment,
+            probability_fragment,
             {"fragmentation": 0.4, "fragmentation_type": "nodes"},
         )
         self.assertLessEqual(len(res), len(G.nodes))
@@ -193,7 +193,7 @@ class TestAnalyser(unittest.TestCase):
         res = get_hole_size_distribution(
             G,
             iterations,
-            _probability_fragment,
+            probability_fragment,
             {"fragmentation": 0.4, "fragmentation_type": "nodes"},
         )
         self.assertLessEqual(len(res), len(G.nodes))

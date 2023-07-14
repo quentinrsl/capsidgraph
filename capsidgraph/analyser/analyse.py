@@ -5,7 +5,7 @@ from inspect import signature
 import random
 
 
-def _get_framentation_probability(
+def get_framentation_probability(
     G: nx.Graph,
     stop_condition: int | Callable[[int, float, Dict], bool],
     fragment: Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None],
@@ -59,7 +59,7 @@ def _bisection_stop_condition(n: int, pfrag: float, settings: Dict) -> bool:
     )
 
 
-def _bisection(
+def bisection(
     G: nx.Graph,
     steps: int,
     error_probability: float,
@@ -78,7 +78,7 @@ def _bisection(
         middle = (lower_bound + upper_bound) / 2
         step_count += 1
         fragment_settings["fragmentation"] = middle
-        pfrag, iteration_count = _get_framentation_probability(
+        pfrag, iteration_count = get_framentation_probability(
             G,
             _bisection_stop_condition,
             fragment,
