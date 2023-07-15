@@ -8,7 +8,7 @@ import random
 def get_framentation_probability(
     G: nx.Graph,
     stop_condition: int | Callable[[int, float, Dict], bool],
-    fragment: Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None],
+    fragment: Callable[[nx.Graph, Dict], nx.Graph] | Callable[[nx.Graph], nx.Graph],
     stop_condition_settings: Dict | None = None,
     fragment_settings: Dict | None = None,
     debug: bool = False,
@@ -23,7 +23,7 @@ def get_framentation_probability(
     stop_condition : int | Callable[[int, float, Dict], bool]
         The stop condition for the fragmentation process. If an int is given, the process will stop after this number of iterations. If a callable is given, the process will stop when the callable returns True. The callable takes as parameters the number of iterations, the current estimated fragmentation probability and the stop_condition_settings
     fragment : Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None]
-        The fragmentation method to use. It must take as parameter a graph and a dict of settings and return a graph. If the fragmentation method does not take settings, it can be given without the settings parameter
+        The fragmentation method to use. It must take as parameter a graph and a dict of settings and return the fragmented graph. If the fragmentation method does not take settings, it can be given without the settings parameter
     stop_condition_settings : Dict | None
         The settings to pass to the stop condition callable
     fragment_settings : Dict | None
@@ -108,7 +108,7 @@ def bisection(
     G: nx.Graph,
     steps: int,
     error_probability: float,
-    fragment: Callable[[nx.Graph, Dict], None],
+    fragment: Callable[[nx.Graph, Dict], nx.Graph],
     fragment_settings: Dict | None = None,
     min_iterations: int = 1000,
     max_iterations: int = 1000000,
@@ -174,7 +174,7 @@ def bisection(
 def get_fragment_size_distribution(
     G: nx.Graph,
     iterations: int,
-    fragment: Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None],
+    fragment: Callable[[nx.Graph, Dict], nx.Graph] | Callable[[nx.Graph], nx.Graph],
     fragment_settings: Dict | None = None,
 ) -> List[float]:
     """
@@ -261,7 +261,7 @@ def _get_hole_size(fragmented_graph:nx.Graph, original_graph:nx.Graph)->int:
 def get_hole_size_distribution(
     G: nx.Graph,
     iterations: int,
-    fragment: Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None],
+    fragment: Callable[[nx.Graph, Dict], nx.Graph] | Callable[[nx.Graph], nx.Graph],
     fragment_settings: Dict | None = None,
 ) -> List[float]:
     """

@@ -4,6 +4,25 @@ from typing import Dict, List
 
 
 def probability_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
+    """
+    Fragment the graph G by removing each node or edge with a gibe probability
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to fragment
+    settings : Dict
+        The settings of the fragmentation.
+
+        The `fragmentation` entry is the probability of removal. Its value is a float between 0 and 1.
+
+        The `fragmentation_type` determines whether to remove nodes or edges. Its value can be `"edges"` or `"nodes"`
+
+    Returns
+    -------
+    nx.Graph
+        The fragmented graph
+    """
     G_ = G.copy()
     p = settings["fragmentation"]
     fragmentation_type = settings["fragmentation_type"]
@@ -21,6 +40,25 @@ def probability_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
 
 
 def energy_edges_fragment(G: nx.Graph, settings: dict) -> nx.Graph:
+    """
+    Fragment the graph G by randomly removing edges until the energy of the energy removed from the graph is equal to a given value.
+    A probability weight is assigned to each edge, inversly proportional to its `energy` attribute.
+    The energy of the graph is the sum of the energy of the edges.
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to fragment
+    settings : Dict
+        The settings of the fragmentation.
+
+        The `fragmentation` entry is the energy to remove from the graph. Its value is a float.
+
+    Returns
+    -------
+    nx.Graph
+        The fragmented graph
+    """
     # Get the attributes of the edges of the graph
     bond_energy = nx.get_edge_attributes(G, "energy")
     edges = list(G.edges)
@@ -70,6 +108,9 @@ def _remove_node(
     weights: List[float],
     i: int,
 ):
+    """
+    Remove a node from the graph and update the energy of the neighbours
+    """
     removed_neighbours = []
     for n1, n2, edgeAttributes in G.edges(remaining_nodes[i], True):
         neighbour = n1 if n1 != remaining_nodes[i] else n2
@@ -95,6 +136,25 @@ def _remove_node(
 
 
 def energy_nodes_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
+    """
+    Fragment the graph G by randomly removing nodes until the energy of the graph is less that a given value.
+    A probability weight is assigned to each node, inversly proportional to the sum of the `energy` attribute of its neighbouring edge.
+    The energy of the graph is the sum of the energy of the edges.
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to fragment
+    settings : Dict
+        The settings of the fragmentation.
+
+        The `fragmentation` entry is the energy to remove from the graph. Its value is a float.
+
+    Returns
+    -------
+    nx.Graph
+        The fragmented graph
+    """
     weights = []
     for e in G.nodes:
         weights.append(1 / G.nodes[e]["energy"])
