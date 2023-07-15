@@ -12,7 +12,30 @@ def get_framentation_probability(
     stop_condition_settings: Dict | None = None,
     fragment_settings: Dict | None = None,
     debug: bool = False,
-) -> Tuple[float, bool]:
+) -> Tuple[float, int]:
+    """
+    Compute the fragmentation probability of a graph G using a given fragmentation method
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to fragment
+    stop_condition : int | Callable[[int, float, Dict], bool]
+        The stop condition for the fragmentation process. If an int is given, the process will stop after this number of iterations. If a callable is given, the process will stop when the callable returns True. The callable takes as parameters the number of iterations, the current estimated fragmentation probability and the stop_condition_settings
+    fragment : Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None]
+        The fragmentation method to use. It must take as parameter a graph and a dict of settings and return a graph. If the fragmentation method does not take settings, it can be given without the settings parameter
+    stop_condition_settings : Dict | None
+        The settings to pass to the stop condition callable
+    fragment_settings : Dict | None
+        The settings to pass to the fragmentation method
+    debug : bool
+        If True, print debug information
+
+    Returns
+    -------
+    Tuple[float, bool]
+        The estimated fragmentation probability and an int representing the number of iterations used to compute it
+    """
     start = time.time()
     fragmentation_count = 0
     pfrag = 0
@@ -51,6 +74,28 @@ def get_framentation_probability(
 
 
 def _bisection_stop_condition(n: int, pfrag: float, settings: Dict) -> bool:
+    """
+    Stop condition for the bisection method
+    Returns True if 4*n*(pfrag-0.5)^2 >= 1/error_probability or n >= max_iterations
+    This ensures that the probability of making an error in ont of the bissection step (estimating pfrag>1/2  when pfrag<1/2 or pfrag<1/2 when pfrag>1/2) is less than error_probability
+
+    Parameters
+    ----------
+    n : int
+        The number of iterations
+    pfrag : float
+        The current estimated fragmentation probability
+    settings : Dict
+        The settings of the bisection method\n
+        The entry "error_probability" is the probability of making an error in one bisection step\n
+        The entry "max_iterations" is the maximum number of iterations to perform before stopping the bisection method\n
+        The entry "min_iterations" is the minimum number of iterations to perform
+
+    Returns
+    -------
+    bool
+        True if the stop condition is met, False otherwise
+    """
     INV_PROBA = 1 / settings["error_probability"]
     max_iterations = settings.get("max_iterations", 1000000)
     min_iterations = settings.get("min_iterations", 1000)
@@ -63,12 +108,39 @@ def bisection(
     G: nx.Graph,
     steps: int,
     error_probability: float,
-    fragment: Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None],
+    fragment: Callable[[nx.Graph, Dict], None],
     fragment_settings: Dict | None = None,
     min_iterations: int = 1000,
     max_iterations: int = 1000000,
     debug: bool = False,
 ) -> Tuple[float, int]:
+    """
+    Compute the fragmentation threshold of a graph G using a given fragmentation method, ie the "fragmentation" parameter of the fragmentation method for which the graph is fragmented with probability 1/2
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to fragment
+    steps : int
+        The number of bisection steps to perform
+    error_probability : float
+        The probability of making an error during the entire bisection process
+    fragment : Callable[[nx.Graph, Dict], None]
+        The fragmentation method to use. It must take as parameter a graph and a dict of settings and return the fragmented graph.
+        The fragmentation method must take a settings parameter which is a dict containing the "fragmentation" parameter, a value between 0 and 1
+    fragment_settings : Dict | None
+        The settings to pass to the fragmentation method, except for the "fragmentation", "min_iterations", "max_iterations" parameter
+    min_iterations : int
+        The minimum number of iterations to perform for each step
+    max_iterations : int
+        The maximum number of iterations to perform for each step
+
+    Returns
+    -------
+    Tuple[float, int]
+        The estimated fragmentation threshold and the number of steps reached
+
+    """
     # Compute the upper bond of error for one bisection step from the upper bond of making a mistake in the entire process
     eps = 1 - (1 - error_probability) ** (1 / steps)
     lower_bound = 0
@@ -99,17 +171,32 @@ def bisection(
     return middle, step_count
 
 
-# G is the graph to percolate on
-# p is the probability of removal of each nodes/edges
-# n is the number of iterations
-# fragtype is either "nodes" or "edges" and determine if edges or nodes are to be removed
-# Returns an array A where A[i] is the number of fragments with size i encountered
 def get_fragment_size_distribution(
     G: nx.Graph,
     iterations: int,
     fragment: Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None],
     fragment_settings: Dict | None = None,
 ) -> List[float]:
+    """
+    Compute the distribution of the size of the fragments obtained by fragmenting a graph G with a given fragmentation method
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to fragment
+    iterations : int
+        The number of iterations to perform
+    fragment : Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None]
+        The fragmentation method to use. It must take as parameter a graph and a dict of settings and return the fragmented graph. The function may not take the settings parameter.
+    fragment_settings : Dict | None
+        The settings to pass to the fragmentation method.
+
+    Returns
+    -------
+    List[float]
+        The distribution of the size of the fragments obtained by fragmenting a graph G with a given fragmentation method.
+        The entry i of the list is the estimated expected number of fragments of size i
+    """
     fragments_size = {}
     max_size = 0
     for i in range(iterations):
@@ -131,11 +218,29 @@ def get_fragment_size_distribution(
 # Hole Size Detection
 # ===================
 
-## Unweighted graphs
+def _get_hole_size(fragmented_graph:nx.Graph, original_graph:nx.Graph)->int:
+    """
+    Compute the size of the hole in a fragmented graph.
 
-
-def _get_hole_size(fragmneted_graph, original_graph):
-    connected_components = list(nx.connected_components(fragmneted_graph))
+    Parameters
+    ----------
+    fragmented_graph : nx.Graph
+        The fragmented graph.
+    original_graph : nx.Graph
+        The graph that has been fragmented to give `fragmented_graph`
+    
+    Returns
+    -------
+    int
+        the size of the hole size of the fragmented graph
+    
+    Notes
+    -----
+    To define a hole we consider the largest connected component of `fragmented_graph`. We then take the dual of that graph (ie. The graph contructed by taking out those nodes from `original_graph`).
+    The largest connected component of that graph is the hole.
+    In case of multiple largest conencted components for `gragmented_graph` we repeat the process for each of them and return the smallest value.
+    """
+    connected_components = list(nx.connected_components(fragmented_graph))
     if len(connected_components) == 0:
         return len(original_graph.nodes)
     largest_component_size = len(max(connected_components, key=len))
@@ -159,6 +264,25 @@ def get_hole_size_distribution(
     fragment: Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None],
     fragment_settings: Dict | None = None,
 ) -> List[float]:
+    """
+    Compute the distribution of the size of the holes obtained by fragmenting a graph G with a given fragmentation method.
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to fragment
+    iterations : int
+        The number of iterations to perform
+    fragment : Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None]
+        The fragmentation method to use, it must take as a parameter the graph to fragment, and may take a second Dict paramter containing settings.
+    fragment_settings : Dict
+        The settings to pass to the fragment method
+
+    Returns
+    -------
+    List[float]:
+        The probability distribution of hole sizes. The i-th entry of the list is the probability of obtaining a hole of size i.
+    """
     # Initialize the list of hole sizes
     holes_size = {}
     # For each iteration

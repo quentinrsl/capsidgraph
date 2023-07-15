@@ -16,8 +16,8 @@ from capsidgraph.analyser import (
 
 from capsidgraph.analyser import init_nodes_energy
 
-iterations = 10000
-frames = 30
+iterations = 1000
+frames = 20
 
 h = 1
 k = 1
