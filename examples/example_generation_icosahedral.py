@@ -8,6 +8,10 @@ from capsidgraph.generator import (
     create_icosahedral_capsid_graph,
 )
 
+"""
+This example shows how to use capsidgraph.generator to create an icosahedral capsid graph from a lattice parttern.
+"""
+
 for P in [icosahedral_patterns.PATTERN_333333, icosahedral_patterns.PATTERN_666, icosahedral_patterns.PATTERN_6363, icosahedral_patterns.PATTERN_6434, icosahedral_patterns.PATTERN_3336]:
     h = 1
     k = 1

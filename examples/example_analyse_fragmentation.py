@@ -9,6 +9,11 @@ from capsidgraph.generator import (
 from capsidgraph.analyser import get_fragmentation_probability_random_edge_removal
 from capsidgraph.analyser import get_fragmentation_probability_random_node_removal
 
+"""
+This example demonstrate how one can use the get_fragmentation_probability_random_node_removal and get_fragmentation_probability_random_edge_removal functions to study a weighted interaction network under random edge and node removal.
+This example computes the percolation threshold for different removal probability and plots the result.
+"""
+
 fragmentation_type = "nodes"  # "nodes" or "edges", type of removal
 processes = 4  # Number of processes
 iterations = 10000  # Number of iterations

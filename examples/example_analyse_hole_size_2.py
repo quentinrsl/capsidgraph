@@ -16,6 +16,11 @@ from capsidgraph.analyser import (
 
 from capsidgraph.analyser import init_nodes_energy
 
+"""
+This example is similar to example_analyse_hole_size.py, but the distribution is computed for different fraction of energy removed.
+The result is animated with matplotlib
+"""
+
 iterations = 1000
 frames = 20
 
@@ -55,5 +60,8 @@ def animate(i):
     for j in range(len(G.nodes) + 1):
         bar[j].set_height(distributions[i][j])
     return bar
+
+ani = animation.FuncAnimation(
+    fig, animate, interval=80, frames=frames, blit=True)
 
 plt.show()

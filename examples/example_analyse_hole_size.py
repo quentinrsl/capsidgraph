@@ -13,6 +13,13 @@ from capsidgraph.analyser import (
     get_hole_size_distribution
 )
 
+"""
+This example shows how to use the get_hole_size_distribution function 
+to determine the probability distribution of hole sizes of a graph under fargmentation.
+The fragmentation method used here is the energy node removal method with all edges having the same energy.
+the result is diplayed in a matplotlib bar graph
+"""
+
 iterations = 10000
 E = 1
 
