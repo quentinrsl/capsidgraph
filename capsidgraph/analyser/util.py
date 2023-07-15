@@ -6,6 +6,20 @@ from typing import List
 # Create weight on nodes based on the sum of the energy of the bonds attached to it
 # Ignore nodes that are in the blacklist (act if they were removed)hist
 def _init_nodes_energy(G: nx.Graph) -> List[float]:
+    """
+    Initialize the energy of each node of the graph G by setting the `energy` attribute of each nodes.
+    The energy of a node is the sum of the energy of the edges attached to it.
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to initialize
+
+    Returns
+    -------
+    List[float]
+        The list of the probability weight of each node
+    """
     # Compute node weights
     for node in G.nodes():
         energy = 0

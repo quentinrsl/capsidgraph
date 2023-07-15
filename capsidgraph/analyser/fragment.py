@@ -138,7 +138,7 @@ def _remove_node(
 def energy_nodes_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
     """
     Fragment the graph G by randomly removing nodes until the energy of the graph is less that a given value.
-    A probability weight is assigned to each node, inversly proportional to the sum of the `energy` attribute of its neighbouring edge.
+    A probability weight is assigned to each node, inversly proportional to the sum of its `energy` attribute.
     The energy of the graph is the sum of the energy of the edges.
 
     Parameters
