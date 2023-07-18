@@ -7,6 +7,13 @@ from capsidgraph.generator import create_icosahedral_capsid_graph
 from capsidgraph.generator import create_cubic_capsid_graph
 from capsidgraph.generator import create_icosahedral_texture
 from capsidgraph.generator.face.patterns import icosahedral_patterns
+
+from capsidgraph.generator import (
+    create_cubic_face_edges,
+    cubic_patterns,
+    create_cubic_capsid_graph,
+)
+
 from math import sqrt
 
 
@@ -157,6 +164,7 @@ class TestGeneration(unittest.TestCase):
 
     def test_texture_generator(self):
         from PIL import Image
+
         P = icosahedral_patterns.PATTERN_6434
         img = create_icosahedral_texture(P, 2, 1)
         img2 = Image.open("tests/test_texture.png")
@@ -166,6 +174,20 @@ class TestGeneration(unittest.TestCase):
         img_matrix = np.asarray(img)
         img2_matrix = np.asarray(img2)
         self.assertTrue(np.all(img_matrix == img2_matrix))
+
+    def test_cubic_generator(self):
+        for P, testfile in [
+            (cubic_patterns.AALAS_24_PATTERN, "tests/AaLS_24.adjlist"),
+            (cubic_patterns.AALAS_48_PATTERN, "tests/AaLS_48.adjlist"),
+            (cubic_patterns.AALAS_60_PATTERN, "tests/AaLS_60.adjlist"),
+        ]:
+            [edges, Tx, Ty, face_side_edge] = P
+            face_edges, face_square_vertices = create_cubic_face_edges(
+                edges, Tx, Ty, face_side_edge
+            )
+            G = create_cubic_capsid_graph(face_edges, face_square_vertices)
+            G2 = nx.read_adjlist(testfile)
+            self.assertTrue(nx.is_isomorphic(G, G2))
 
 
 if __name__ == "__main__":

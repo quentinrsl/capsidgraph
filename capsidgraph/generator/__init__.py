@@ -4,8 +4,11 @@ from typing import List, Tuple, Dict
 
 from .face.icosahedral import rotate_point as _rotate_icosahedral_point
 from .face.icosahedral import create_face_edges as create_icosahedral_face_edges
-from .face.cubic import rotate_point as _rotate_cubic_point
 from .face.patterns import icosahedral_patterns
+
+from .face.cubic import rotate_point as _rotate_cubic_point
+from .face.cubic import create_face_edges as create_cubic_face_edges
+from .face.patterns import cubic_patterns
 
 from .merger import merge_faces, _create_face_graph
 
