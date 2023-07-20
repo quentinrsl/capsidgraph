@@ -18,8 +18,8 @@ from .texture.icosahedral import create_texture as create_icosahedral_texture
 
 
 def create_icosahedral_capsid_graph(
-    faceEdges: List[Edge],
-    triangle_certices: Tuple[Point, Point, Point],
+    face_edges: List[Edge],
+    triangle_vertices: Tuple[Point, Point, Point],
     bond_strength: List[float] | None = None,
 ) -> nx.Graph:
     if bond_strength != None and 0 in bond_strength:
@@ -30,7 +30,7 @@ def create_icosahedral_capsid_graph(
     # We then build the capsid by creating 20 triangular faces
     for face_id in range(20):
         face, face_coordinates = _create_face_graph(
-            faceEdges, face_id, node_id, bond_strength=bond_strength
+            face_edges, face_id, node_id, bond_strength=bond_strength
         )
         node_id += len(face.nodes)
         G = nx.compose(G, face)
@@ -43,7 +43,7 @@ def create_icosahedral_capsid_graph(
             G,
             coordinates,
             _rotate_icosahedral_point,
-            triangle_certices,
+            triangle_vertices,
             2 * i,
             2 * i + 1,
             0,
@@ -54,7 +54,7 @@ def create_icosahedral_capsid_graph(
             G,
             coordinates,
             _rotate_icosahedral_point,
-            triangle_certices,
+            triangle_vertices,
             2 * i + 1,
             (2 * i + 2) % 10,
             1,
@@ -66,7 +66,7 @@ def create_icosahedral_capsid_graph(
             G,
             coordinates,
             _rotate_icosahedral_point,
-            triangle_certices,
+            triangle_vertices,
             i,
             10 + i,
             (i + 1) % 2,
@@ -79,7 +79,7 @@ def create_icosahedral_capsid_graph(
             G,
             coordinates,
             _rotate_icosahedral_point,
-            triangle_certices,
+            triangle_vertices,
             10 + i,
             10 + ((i + 2) % 10),
             2,

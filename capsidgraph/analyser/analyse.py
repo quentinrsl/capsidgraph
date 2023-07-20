@@ -4,6 +4,10 @@ from typing import List, Tuple, Dict, Callable
 from inspect import signature
 import random
 
+def _is_fragmented(G: nx.Graph) -> bool:
+    return len(G.nodes) > 0 and not nx.is_connected(G)
+
+
 
 def get_framentation_probability(
     G: nx.Graph,
@@ -11,6 +15,7 @@ def get_framentation_probability(
     fragment: Callable[[nx.Graph, Dict], nx.Graph] | Callable[[nx.Graph], nx.Graph],
     stop_condition_settings: Dict | None = None,
     fragment_settings: Dict | None = None,
+    is_fragmented: Callable[[nx.Graph], bool] = _is_fragmented,
     debug: bool = False,
 ) -> Tuple[float, int]:
     """
@@ -54,7 +59,7 @@ def get_framentation_probability(
             G_ = fragment(G)
 
         n += 1
-        if len(G_.nodes) > 0 and not nx.is_connected(G_):
+        if is_fragmented(G_):
             fragmentation_count += 1
         pfrag = fragmentation_count / n
     if debug:
@@ -67,7 +72,7 @@ def get_framentation_probability(
             n,
             "got p(frag)=",
             pfrag,
-            000 * (time.time() - start) / n,
+            1000 * (time.time() - start) / n,
             "ms/sim",
         )
     return pfrag, n
@@ -110,6 +115,7 @@ def bisection(
     error_probability: float,
     fragment: Callable[[nx.Graph, Dict], nx.Graph],
     fragment_settings: Dict | None = None,
+    is_fragmented: Callable[[nx.Graph], bool] = _is_fragmented,
     min_iterations: int = 1000,
     max_iterations: int = 1000000,
     debug: bool = False,
@@ -146,6 +152,8 @@ def bisection(
     lower_bound = 0
     upper_bound = 1
     step_count = 0
+    if(fragment_settings is None):
+        fragment_settings = {}
     while step_count < steps:
         middle = (lower_bound + upper_bound) / 2
         step_count += 1
@@ -159,6 +167,7 @@ def bisection(
                 "min_iterations": min_iterations,
                 "max_iterations": max_iterations,
             },
+            is_fragmented=is_fragmented,
             fragment_settings=fragment_settings,
             debug=debug,
         )
@@ -214,11 +223,7 @@ def get_fragment_size_distribution(
     ]
 
 
-# ===================
-# Hole Size Detection
-# ===================
-
-def _get_hole_size(fragmented_graph:nx.Graph, original_graph:nx.Graph)->int:
+def _get_hole_size(fragmented_graph: nx.Graph, original_graph: nx.Graph) -> int:
     """
     Compute the size of the hole in a fragmented graph.
 
@@ -228,12 +233,12 @@ def _get_hole_size(fragmented_graph:nx.Graph, original_graph:nx.Graph)->int:
         The fragmented graph.
     original_graph : nx.Graph
         The graph that has been fragmented to give `fragmented_graph`
-    
+
     Returns
     -------
     int
         the size of the hole size of the fragmented graph
-    
+
     Notes
     -----
     To define a hole we consider the largest connected component of `fragmented_graph`. We then take the dual of that graph (ie. The graph contructed by taking out those nodes from `original_graph`).

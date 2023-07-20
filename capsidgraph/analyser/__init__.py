@@ -10,7 +10,7 @@ from typing import Tuple
 
 
 def get_fragmentation_probability_random_node_removal(
-    G: nx.Graph, removal_probability: float, iterations: int
+    G: nx.Graph, removal_probability: float, iterations: int, debug: bool = False
 ) -> float:
     """
     Compute the probability of a graph fragmenting when randomly removing every node with a given probability.
@@ -37,12 +37,13 @@ def get_fragmentation_probability_random_node_removal(
             "fragmentation": removal_probability,
             "fragmentation_type": "nodes",
         },
+        debug=debug,
     )
     return pfrag
 
 
 def get_fragmentation_probability_random_edge_removal(
-    G: nx.Graph, removal_probability: float, iterations: int
+    G: nx.Graph, removal_probability: float, iterations: int, debug: bool = False
 ) -> float:
     """
     Compute the probability of a graph fragmenting when randomly removing every edge with a given probability.
@@ -69,11 +70,12 @@ def get_fragmentation_probability_random_edge_removal(
             "fragmentation": removal_probability,
             "fragmentation_type": "edges",
         },
+        debug=debug,
     )
     return pfrag
 
 def get_fragmentation_probability_energy_node_removal(
-    G: nx.Graph, removal_energy: float, iterations: int
+    G: nx.Graph, removal_energy: float, iterations: int, debug: bool = False
 ) -> float:
     """
     Compute the probability of a graph fragmenting when removing random nodes util a fraction of the graph "energy" has been removed.
@@ -96,7 +98,7 @@ def get_fragmentation_probability_energy_node_removal(
 
     Notes
     -----
-    The energy (and thus the probability weight) of neighbouring nodes is not updated when a node is removed.
+    The energy of neighbouring nodes is not updated when a node is removed.
     """
     G_ = G.copy()
     init_nodes_energy(G_)
@@ -107,12 +109,13 @@ def get_fragmentation_probability_energy_node_removal(
         fragment_settings={
             "fragmentation": removal_energy,
         },
+        debug=debug,
     )
     return pfrag
 
 
 def get_fragmentation_probability_energy_edge_removal(
-    G: nx.Graph, removal_energy: float, iterations: int
+    G: nx.Graph, removal_energy: float, iterations: int, debug: bool = False
 ) -> float:
     """
     Compute the probability of a graph fragmenting when removing random edges util a fraction of the graph "energy" has been removed.
@@ -140,6 +143,7 @@ def get_fragmentation_probability_energy_edge_removal(
         fragment_settings={
             "fragmentation": removal_energy,
         },
+        debug=debug,
     )
     return pfrag
 
