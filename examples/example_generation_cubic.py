@@ -12,7 +12,7 @@ from capsidgraph.generator import (
 This example shows how to use capsidgraph.generator to create a cubic capsid graph from a lattice parttern.
 """
 
-for P in [cubic_patterns.AALAS_24_PATTERN, cubic_patterns.AALAS_48_PATTERN, cubic_patterns.AALAS_60_PATTERN]:
+for P in [cubic_patterns.AALS_24_PATTERN, cubic_patterns.AALS_48_PATTERN, cubic_patterns.AALS_60_PATTERN]:
     [edges, Tx, Ty, face_side_edge] = P
     face_edges, face_square_vertices = create_cubic_face_edges(edges, Tx, Ty, face_side_edge)
     G = create_cubic_capsid_graph(face_edges, face_square_vertices)

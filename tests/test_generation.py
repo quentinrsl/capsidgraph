@@ -177,9 +177,9 @@ class TestGeneration(unittest.TestCase):
 
     def test_cubic_generator(self):
         for P, testfile in [
-            (cubic_patterns.AALAS_24_PATTERN, "tests/AaLS_24.adjlist"),
-            (cubic_patterns.AALAS_48_PATTERN, "tests/AaLS_48.adjlist"),
-            (cubic_patterns.AALAS_60_PATTERN, "tests/AaLS_60.adjlist"),
+            (cubic_patterns.AALS_24_PATTERN, "tests/AaLS_24.adjlist"),
+            (cubic_patterns.AALS_48_PATTERN, "tests/AaLS_48.adjlist"),
+            (cubic_patterns.AALS_60_PATTERN, "tests/AaLS_60.adjlist"),
         ]:
             [edges, Tx, Ty, face_side_edge] = P
             face_edges, face_square_vertices = create_cubic_face_edges(

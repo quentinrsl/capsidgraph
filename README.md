@@ -148,7 +148,7 @@ from capsidgraph.generator import (
     create_cubic_face_edges,
     create_cubic_capsid_graph,
 )
-P = cubic_patterns.AALAS_48_PATTERN
+P = cubic_patterns.AALS_48_PATTERN
 [edges, Tx, Ty, face_side_edge] = P
 face_edges, face_square_vertices = create_cubic_face_edges(edges, Tx, Ty, face_side_edge)
 G = create_cubic_capsid_graph(face_edges, face_square_vertices)
