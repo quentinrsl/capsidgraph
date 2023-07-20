@@ -65,12 +65,7 @@ Consider the set of connected components of maximal size $\Set{C_0=(V_0, E_0),..
 
  $\bar{V_i} = V \setminus V_i$
  
- $\bar{E_i} = \Set{\Set{u,v} : \begin{cases} 
-    \Set{u,v}\in E\\
-    u \in \bar{V_i}\\
-    v \in \bar{V_i} \\
-    \end{cases}}
-$
+ $\bar{E_i} = \Set{\Set{u,v} :\Set{u,v}\in E, u \in \bar{V_i}, v \in \bar{V_i}}$
 
 let $H_i$ be the size of> the largest connected component of $C_i$
 
