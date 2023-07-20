@@ -3,6 +3,10 @@ Capsidgraph is a python library for generating and studying the graphs represent
 # Required libraries
 * The `networkx` library is used to handle operations on graphs.
 * The `matplotlib` and `numpy` libraries are used to create figures.
+* To use the capsidgraph library, you need to add the capsidgraph folder to your PYTHONPATH environment variable. This can be done by adding the following line to your .bashrc file (replace the path with the path to the capsidgraph folder on your computer):
+```bash
+export PYTHONPATH=$PYTHONPATH:/path/to/capsidgraph
+```
 
 # Graph analysis
 The `capsidgraph.analyser` module provides tools to compute information on the bond strength of different capsid graphs. This module requires networkx graphs with weighted nodes and can give insight into the ability of a capsid to resist both the removal of bonds (edges in the graph) and capsomers, i.e. protein units corresponding to the building blocks of the capsid (nodes in the graph).
@@ -53,7 +57,7 @@ Note that for these functions to work properly, the `energy` attribute of the no
 ## Hole size detection
 The `capsidgraph.generator` modules provides methods to compute the statistic destribution of "hole sizes" in graph under fragmentation.
 ### Definition of hole size
-Let $G = (V,E)$ be the graph we want to fragment, let $G' = (V',E')$ the graph where nodes or edges have been removed ($G \neq G'$), we want to define the size of the largest hole in $G'$.
+Let $G = (V,E)$ be the graph we want to fragment, let $G' = (V',E')$ the graph where nodes or edges have been removed ($G \neq G'$ and $V \neq \empty$), we want to define the size of the largest hole in $G'$.
 
 Consider the set of connected components of maximal size $\Set{C_0=(V_0, E_0),...,C_p=(V_p,E_p)}$
 
@@ -68,13 +72,14 @@ Consider the set of connected components of maximal size $\Set{C_0=(V_0, E_0),..
     \end{cases}}
 $
 
-let $H_i$ be the size of the largest connected component of $C_i$
+let $H_i$ be the size of> the largest connected component of $C_i$
 
 Then the largest hole size of $G'$, $H(G') = \max_{0 \leq j \leq p }{H_j}$
 
 We say that a graph is _hole-fragmented_ if $H(G') \geq \lfloor \frac{|V|}{2} \rfloor$
 
 If $G=G'$, by convention we define $H(G')=0$
+Similarly, if $V'=\empty$ we define $H(G')=|V|$
 
 ### Implementations
 The `get_hole_size` function implements the above-mentioned algorithm to determine the size of the largest hole of a graph.
