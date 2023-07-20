@@ -1,5 +1,11 @@
 import networkx as nx
-from .analyse import get_framentation_probability, bisection, get_fragment_size_distribution, get_hole_size_distribution
+from .analyse import (
+    get_framentation_probability,
+    bisection,
+    get_fragment_size_distribution,
+    get_hole_size_distribution,
+    get_hole_size
+)
 from .fragment import (
     probability_fragment,
     energy_edges_fragment,
@@ -23,7 +29,7 @@ def get_fragmentation_probability_random_node_removal(
         The probability to to remove every node, a float between 0 and 1.
     iterations : int
         The number of iterations used for the estiamtion
-    
+
     Returns
     -------
     float
@@ -56,7 +62,7 @@ def get_fragmentation_probability_random_edge_removal(
         The probability to to remove every edge, a float between 0 and 1.
     iterations : int
         The number of iterations used for the estiamtion
-    
+
     Returns
     -------
     float
@@ -74,6 +80,7 @@ def get_fragmentation_probability_random_edge_removal(
     )
     return pfrag
 
+
 def get_fragmentation_probability_energy_node_removal(
     G: nx.Graph, removal_energy: float, iterations: int, debug: bool = False
 ) -> float:
@@ -81,7 +88,7 @@ def get_fragmentation_probability_energy_node_removal(
     Compute the probability of a graph fragmenting when removing random nodes util a fraction of the graph "energy" has been removed.
     Each node has a probability weight proportional to the inverse of the sum of the `energy` attributes of the edges connected to it.
     The energy of the graph is defined as the sum of the energy of all edges.
-    
+
     Parameters
     ----------
     G : nx.Graph
@@ -158,7 +165,7 @@ def get_fragmentation_probability_threshold_node(
 ) -> Tuple[float, int]:
     """
     Estimate the probability of node removal that will fragment the graph with a probability of 1/2.
-    
+
     Parameters
     ----------
     G : nx.Graph

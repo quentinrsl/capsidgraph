@@ -1,7 +1,7 @@
 import unittest
 import networkx as nx
 from capsidgraph.analyser.analyse import (
-    _get_hole_size,
+    get_hole_size,
     _bisection_stop_condition,
     get_framentation_probability,
     bisection,
@@ -183,9 +183,9 @@ class TestAnalyser(unittest.TestCase):
         )
         G_frag = G.copy()
         G_frag.remove_nodes_from([1, 2, 3, 4])
-        self.assertEqual(_get_hole_size(G_frag, G), 5)
-        self.assertEqual(_get_hole_size(G, G), 0)
-        self.assertEqual(_get_hole_size(nx.empty_graph(0), G), len(G.nodes))
+        self.assertEqual(get_hole_size(G_frag, G), 5)
+        self.assertEqual(get_hole_size(G, G), 0)
+        self.assertEqual(get_hole_size(nx.empty_graph(0), G), len(G.nodes))
 
     def test_hole_distribution(self):
         iterations = 100

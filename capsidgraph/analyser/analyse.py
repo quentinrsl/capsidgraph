@@ -223,7 +223,7 @@ def get_fragment_size_distribution(
     ]
 
 
-def _get_hole_size(fragmented_graph: nx.Graph, original_graph: nx.Graph) -> int:
+def get_hole_size(fragmented_graph: nx.Graph, original_graph: nx.Graph) -> int:
     """
     Compute the size of the hole in a fragmented graph.
 
@@ -296,7 +296,7 @@ def get_hole_size_distribution(
             G_ = fragment(G, fragment_settings)
         else:
             G_ = fragment(G)
-        m = _get_hole_size(G_, G)
+        m = get_hole_size(G_, G)
         holes_size[m] = holes_size.get(m, 0) + 1
     return [
         holes_size[i] / iterations if i in holes_size else 0
