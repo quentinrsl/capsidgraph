@@ -57,7 +57,7 @@ Note that for these functions to work properly, the `energy` attribute of the no
 ## Hole size detection
 The `capsidgraph.generator` modules provides methods to compute the statistic destribution of "hole sizes" in graph under fragmentation.
 ### Definition of hole size
-Let $G = (V,E)$ be the graph we want to fragment, let $G' = (V',E')$ the graph where nodes or edges have been removed ($G \neq G'$ and $V \neq \empty$), we want to define the size of the largest hole in $G'$.
+Let $G = (V,E)$ be the graph we want to fragment, let $G' = (V',E')$ the graph where nodes or edges have been removed ($G \neq G'$ and $V \neq \emptyset$), we want to define the size of the largest hole in $G'$.
 
 Consider the set of connected components of maximal size $\Set{C_0=(V_0, E_0),...,C_p=(V_p,E_p)}$
 
@@ -79,7 +79,7 @@ Then the largest hole size of $G'$, $H(G') = \max_{0 \leq j \leq p }{H_j}$
 We say that a graph is _hole-fragmented_ if $H(G') \geq \lfloor \frac{|V|}{2} \rfloor$
 
 If $G=G'$, by convention we define $H(G')=0$
-Similarly, if $V'=\empty$ we define $H(G')=|V|$
+Similarly, if $V'=\emptyset$ we define $H(G')=|V|$
 
 ### Implementations
 The `get_hole_size` function implements the above-mentioned algorithm to determine the size of the largest hole of a graph.
