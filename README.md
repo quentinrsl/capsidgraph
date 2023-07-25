@@ -1,6 +1,7 @@
 # Capsidgraph
 Capsidgraph is a python library for generating and studying the graphs representing the protein subunit interaction networks of viral capsids.
-# Required libraries
+# Requirements
+* Python 3.10 or higher
 * The `networkx` library is used to handle operations on graphs.
 * The `matplotlib` and `numpy` libraries are used to create figures.
 * To use the capsidgraph library, you need to add the capsidgraph folder to your PYTHONPATH environment variable. This can be done by adding the following line to your .bashrc file (replace the path with the path to the capsidgraph folder on your computer):
@@ -129,7 +130,6 @@ This construction is implemented in the function `create_icosahedral_capsid_grap
 * `bond_strength` : optional, this list needs to have the same length as `face_edges`. This parameter defines the bond energy of every vertex of the capsid graph, where  `bond_strength[i]` corresponds to the energy of the bond `face_edges[i]`.
 
 ## Cubic graph generation
-<!-- TODO -->
 Some nanoparticle interaction networks can be constructed through a process similar to the icosahedral generation algorithm, where the icosahedral pattern is replaced by a cubic one. The faces are now squares which vertices sit in 4-fold symetry axis of the lattice.
 The `create_cubic_face_edges` function is similar to `create_icosahedral_face_edges`, with the exeption of the h and k parameters that have been replaced with the coordinates of one vertex of the square face (given that one of them is sitting at the origin this defined the square).
 
