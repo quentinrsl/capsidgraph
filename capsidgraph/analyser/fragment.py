@@ -1,6 +1,7 @@
 import networkx as nx
 import random
 from typing import Dict, List
+import numpy as np
 
 
 def probability_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
@@ -45,12 +46,12 @@ def energy_edges_fragment(G: nx.Graph, settings: dict) -> nx.Graph:
     A probability weight is assigned to each edge, inversly proportional to its `energy` attribute.
     The energy of the graph is the sum of the energy of the edges.
 
-    Parameters
+    Parameter
     ----------
     G : nx.Graph
-        The graph to fragment
+        The graph to fragment (must have an `energy` attribute for each edge)
     settings : Dict
-        The settings of the fragmentation.
+        The asp0.00s of the fragmentation.
 
         The `fragmentation` entry is the energy to remove from the graph. Its value is a float.
 
@@ -68,7 +69,7 @@ def energy_edges_fragment(G: nx.Graph, settings: dict) -> nx.Graph:
         weights.append(1 / bond_energy[e])
     min_bond_energy = 1 / max(weights)  # Energy of the weakest bond
     G_ = G.copy()
-    remaining_nodes = list(G_.edges)
+    remaining_edges = list(G_.edges)
     removed_edges = []
     remainig_edges_weights = weights.copy()
     energy = settings["fragmentation"]
@@ -76,18 +77,18 @@ def energy_edges_fragment(G: nx.Graph, settings: dict) -> nx.Graph:
         i = None
         # randomly pick a bond if there are any left, if the energy of the bond picked is higher than the percolationEnergy left, pick another one.
         # This loop has to stop because the energy is bigger than the minimum bond energy
-        while (i == None or energy <= bond_energy[remaining_nodes[i]]) and len(
-            remaining_nodes
+        while (i == None or energy <= bond_energy[remaining_edges[i]]) and len(
+            remaining_edges
         ) > 0:
             [i] = random.choices(
-                list(range(len(remaining_nodes))), weights=remainig_edges_weights, k=1
+                list(range(len(remaining_edges))), weights=remainig_edges_weights, k=1
             )
 
         # If a bond has been picked, remove it and make subsequent updates
         if i != None:
-            energy -= bond_energy[remaining_nodes[i]]
-            removed_edges.append(remaining_nodes[i])
-            del remaining_nodes[i]
+            energy -= bond_energy[remaining_edges[i]]
+            removed_edges.append(remaining_edges[i])
+            del remaining_edges[i]
             del remainig_edges_weights[i]
             # update weakest bond energy
             if len(remainig_edges_weights) > 0:
@@ -144,7 +145,7 @@ def energy_nodes_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
     Parameters
     ----------
     G : nx.Graph
-        The graph to fragment
+        The graph to fragment, with the energy of each node set
     settings : Dict
         The settings of the fragmentation.
 
@@ -185,6 +186,96 @@ def energy_nodes_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
         else:
             # All edges have been removed
             break
+
+    for node in removed_nodes:
+        G_.remove_node(node)
+
+    return G_
+
+
+def energy_hybrid_fragment(G: nx.Graph, settings: Dict) -> nx.Graph:
+    """
+    Fragment the graph G by randomly removing nodes or edges until the energy of the graph is less that a given value.
+    A probability weight is assigned to each node and each weights, inversly proportional to the sum of its `energy` attribute.
+    The energy of the graph is the sum of the energy of the edges.
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to fragment, with the `energy` attribute on the nodes and edges
+    settings : Dict
+        The settings of the fragmentation.
+
+        The `fragmentation` entry is the energy to remove from the graph. Its value is a float.
+
+    Returns
+    -------
+    nx.Graph
+        The fragmented graph
+    """
+    nodes_weights = []
+    edges_weights = []
+    for n in G.nodes:
+        nodes_weights.append(1 / G.nodes[n]["energy"])
+    for e in G.edges:
+        edges_weights.append(1 / G.edges[e]["energy"])
+    G_ = G.copy()
+    remaining_nodes = list(G_.nodes)
+    removed_nodes = []
+    remaining_edges = list(G_.edges)
+    removed_edges = []
+    energy = settings["fragmentation"]
+
+    min_energy = 1 / max(edges_weights)
+
+    # Choosing what to remove
+    while energy + 1e-15 > min_energy:
+        i = None
+        nodes_energy = np.sum(nodes_weights)
+        edges_energy = np.sum(edges_weights)
+        node_probability = nodes_energy / (nodes_energy + edges_energy)
+        while (
+            i == None
+            or (
+                frag_type == "node"
+                and energy + 1e-15 < G_.nodes[remaining_nodes[i]]["energy"]
+            )
+            or (
+                frag_type == "edge"
+                and energy + 1e-15 < G_.edges[remaining_edges[i]]["energy"]
+            )
+            and len(remaining_edges) > 0
+        ):
+            frag_type = "node" if random.random() < node_probability else "edge"
+            if frag_type == "node":
+                [i] = random.choices(
+                    list(range(len(remaining_nodes))), weights=nodes_weights, k=1
+                )
+            else:
+                [i] = random.choices(
+                    list(range(len(remaining_edges))), weights=edges_weights, k=1
+                )
+
+        # Updating lists
+        if i != None:
+            if frag_type == "node":
+                energy -= G_.nodes[remaining_nodes[i]]["energy"]
+                removed_nodes.append(remaining_nodes[i])
+                # update the energy / probability weights of the neighbouring nodes
+                _remove_node(G_, remaining_nodes, removed_nodes, nodes_weights, i)
+                # remove edges as well TODO
+            else:
+                energy -= G.edges[remaining_edges[i]]["energy"]
+                removed_edges.append(remaining_edges[i])
+                del remaining_edges[i]
+                del edges_weights[i]
+
+            # update weakest bond energy
+            if len(nodes_weights) > 0:
+                min_energy = 1 / max(edges_weights)
+
+    for e in removed_edges:
+        G_.remove_edge(e[0], e[1])
 
     for node in removed_nodes:
         G_.remove_node(node)

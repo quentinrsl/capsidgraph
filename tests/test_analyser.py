@@ -10,6 +10,7 @@ from capsidgraph.analyser.fragment import (
     probability_fragment,
     energy_edges_fragment,
     energy_nodes_fragment,
+    energy_hybrid_fragment
 )
 from capsidgraph.analyser.util import _init_nodes_energy
 from capsidgraph.analyser import (
@@ -82,7 +83,7 @@ class TestAnalyser(unittest.TestCase):
         self.assertGreater(pfrag, 0)
         self.assertGreaterEqual(n, 100)
 
-    def test_fragment_energy_nodes(self):
+    def test_init_energy_nodes(self):
         G = nx.read_adjlist("tests/testcase1.adjlist")
         nx.set_edge_attributes(G, 1 / len(G.edges), "energy")
         _init_nodes_energy(G)
@@ -118,6 +119,26 @@ class TestAnalyser(unittest.TestCase):
             for nei in nx.neighbors(G, n):
                 s += G.edges[(n, nei)]["energy"]
             self.assertEqual(G.nodes[n]["energy"], s)
+    
+    def test_fragment_energy_hybrid(self):
+        G = nx.read_adjlist("tests/testcase1.adjlist")
+        nx.set_edge_attributes(G, 1 / len(G.edges), "energy")
+        _init_nodes_energy(G)
+        fragmentation_energy = 0.5
+        G_ = energy_hybrid_fragment(G, {"fragmentation": fragmentation_energy})
+        
+        for n in G.nodes:
+            s = 0
+            for nei in nx.neighbors(G, n):
+                s += G.edges[(n, nei)]["energy"]
+            self.assertEqual(G.nodes[n]["energy"], s)
+
+        remaining_energy = 0
+        for e in G_.edges:
+            remaining_energy += G_.edges[e]["energy"]
+        self.assertGreater(remaining_energy, 1 - fragmentation_energy)
+        self.assertLess(remaining_energy, 1 - fragmentation_energy + 1/len(G.edges))
+
 
     def test_bisection(self):
         steps = 3
@@ -196,7 +217,7 @@ class TestAnalyser(unittest.TestCase):
             probability_fragment,
             {"fragmentation": 0.4, "fragmentation_type": "nodes"},
         )
-        self.assertEquals(len(res), len(G.nodes) + 1)
+        self.assertEqual(len(res), len(G.nodes) + 1)
         for i in res:
             self.assertGreaterEqual(i, 0)
 
