@@ -3,10 +3,39 @@ import networkx as nx
 from typing import List, Tuple, Dict, Callable
 from inspect import signature
 import random
+from multiprocessing import Value, Pool
 
 def _is_fragmented(G: nx.Graph) -> bool:
     return len(G.nodes) > 0 and not nx.is_connected(G)
 
+
+def _init_fragmentation_probability_worker(shared_n, shared_pfrag, shared_fragmentation_count):
+    global n,pfrag,fragmentation_count
+    n = shared_n
+    pfrag = shared_pfrag
+    fragmentation_count = shared_fragmentation_count
+
+def _get_fragmentation_probability_worker(G,fragment,fragment_settings,stop_condition,stop_condition_settings,is_fragmented,debug,debug_interval):
+    global n,fragmentation_count,pfrag
+    is_incomplete = True
+    while is_incomplete:
+        if len(signature(fragment).parameters) == 2:
+            G_ = fragment(G, fragment_settings)
+        else:
+            G_ = fragment(G)
+        incr = 1 if is_fragmented(G_) else 0
+        #We acquire the semaphore to update values and compute stop_condition
+        with n.get_lock():
+            is_incomplete = (type(stop_condition) == int
+                and n.value < stop_condition
+                or (
+                    callable(stop_condition)
+                    and not stop_condition(n.value, pfrag.value, stop_condition_settings, debug=(debug and n.value%debug_interval == 0))
+                )
+                )
+            n.value += 1
+            fragmentation_count.value += incr
+            pfrag.value = fragmentation_count.value / n.value
 
 
 def get_framentation_probability(
@@ -16,6 +45,7 @@ def get_framentation_probability(
     stop_condition_settings: Dict | None = None,
     fragment_settings: Dict | None = None,
     is_fragmented: Callable[[nx.Graph], bool] = _is_fragmented,
+    process_number: int = 1,
     debug: bool = False,
     debug_interval: int = 100000
 ) -> Tuple[float, int]:
@@ -34,6 +64,8 @@ def get_framentation_probability(
         The settings to pass to the stop condition callable
     fragment_settings : Dict | None
         The settings to pass to the fragmentation method
+    process_number: int
+        Number of processes to spawn to perform the computation
     debug : bool
         If True, print debug information
     debug_interval : int
@@ -45,26 +77,18 @@ def get_framentation_probability(
         The estimated fragmentation probability and an int representing the number of iterations used to compute it
     """
     start = time.time()
-    fragmentation_count = 0
-    pfrag = 0
-    n = 0
-    while (
-        type(stop_condition) == int
-        and n < stop_condition
-        or (
-            callable(stop_condition)
-            and not stop_condition(n, pfrag, stop_condition_settings, debug=(debug and n%debug_interval == 0))
-        )
-    ):
-        if len(signature(fragment).parameters) == 2:
-            G_ = fragment(G, fragment_settings)
-        else:
-            G_ = fragment(G)
+    shared_fragmentation_count = Value("i",True)
+    shared_pfrag = Value("f",True)
+    shared_n = Value("i", True) 
+    shared_fragmentation_count.value = 0
+    shared_n.value = 0
 
-        n += 1
-        if is_fragmented(G_):
-            fragmentation_count += 1
-        pfrag = fragmentation_count / n
+
+    with Pool(process_number,initializer=_init_fragmentation_probability_worker,initargs=(shared_n,shared_pfrag,shared_fragmentation_count)) as pool:
+        for i in range(process_number):
+            pool.apply_async(_get_fragmentation_probability_worker, (G,fragment,fragment_settings,stop_condition,stop_condition_settings,is_fragmented,debug,debug_interval))
+        pool.close()
+        pool.join()
     if debug:
         print(
             "fragmentation setttings=",
@@ -72,13 +96,13 @@ def get_framentation_probability(
             "stop_condition_settings=",
             stop_condition_settings,
             "with n=",
-            n,
+            shared_n.value,
             "got p(frag)=",
-            pfrag,
-            1000 * (time.time() - start) / n,
+            shared_pfrag.value,
+            1000 * (time.time() - start) / shared_n.value,
             "ms/sim",
         )
-    return pfrag, n
+    return shared_pfrag.value, shared_n.value
 
 
 def _bisection_stop_condition(n: int, pfrag: float, settings: Dict, debug=False) -> bool:
@@ -125,6 +149,7 @@ def bisection(
     max_iterations: int = 1000000,
     debug: bool = False,
     debug_interval:int = 100000,
+    process_number: int = 1
 ) -> Tuple[float, int]:
     """
     Compute the fragmentation threshold of a graph G using a given fragmentation method, ie the "fragmentation" parameter of the fragmentation method for which the graph is fragmented with probability 1/2
@@ -148,6 +173,8 @@ def bisection(
         The maximum number of iterations to perform for each step
     debug_interval : int
         The number of iterations between two debug prints
+    process_number: int
+        Number of process to use for the simulations
     Returns
     -------
     Tuple[float, int]
@@ -178,6 +205,7 @@ def bisection(
             fragment_settings=fragment_settings,
             debug=debug,
             debug_interval=debug_interval,
+            process_number=process_number
         )
         if iteration_count == max_iterations:
             return middle, step_count
