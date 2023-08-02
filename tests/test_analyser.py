@@ -127,7 +127,7 @@ class TestAnalyser(unittest.TestCase):
             G.edges[e]["energy"] = 1 / len(G.edges)
         _init_nodes_energy(G)
         pf, n = bisection(
-            G, steps, error_probability, energy_edges_fragment, fragment_settings={}
+            G, steps, error_probability, energy_edges_fragment, fragment_settings={}, debug=True, debug_interval=100
         )
         self.assertAlmostEqual(pf, 0.375)
 

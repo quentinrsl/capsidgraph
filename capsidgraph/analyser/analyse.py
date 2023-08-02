@@ -17,6 +17,7 @@ def get_framentation_probability(
     fragment_settings: Dict | None = None,
     is_fragmented: Callable[[nx.Graph], bool] = _is_fragmented,
     debug: bool = False,
+    debug_interval: int = 100000
 ) -> Tuple[float, int]:
     """
     Compute the fragmentation probability of a graph G using a given fragmentation method
@@ -35,6 +36,8 @@ def get_framentation_probability(
         The settings to pass to the fragmentation method
     debug : bool
         If True, print debug information
+    debug_interval : int
+        The number of interations between two debug messages on the progress
 
     Returns
     -------
@@ -50,7 +53,7 @@ def get_framentation_probability(
         and n < stop_condition
         or (
             callable(stop_condition)
-            and not stop_condition(n, pfrag, stop_condition_settings)
+            and not stop_condition(n, pfrag, stop_condition_settings, debug=(debug and n%debug_interval == 0))
         )
     ):
         if len(signature(fragment).parameters) == 2:
@@ -78,7 +81,7 @@ def get_framentation_probability(
     return pfrag, n
 
 
-def _bisection_stop_condition(n: int, pfrag: float, settings: Dict) -> bool:
+def _bisection_stop_condition(n: int, pfrag: float, settings: Dict, debug=False) -> bool:
     """
     Stop condition for the bisection method
     Returns True if 4*n*(pfrag-0.5)^2 >= 1/error_probability or n >= max_iterations
@@ -104,6 +107,8 @@ def _bisection_stop_condition(n: int, pfrag: float, settings: Dict) -> bool:
     INV_PROBA = 1 / settings["error_probability"]
     max_iterations = settings.get("max_iterations", 1000000)
     min_iterations = settings.get("min_iterations", 1000)
+    if(debug):
+        print("BISECTION PROGRESS : " +str(round(100 * 4 * n * ((pfrag - 0.5) ** 2) / INV_PROBA, 3)) )
     return n >= min_iterations and (
         4 * n * ((pfrag - 0.5) ** 2) >= INV_PROBA or n >= max_iterations
     )
@@ -119,6 +124,7 @@ def bisection(
     min_iterations: int = 1000,
     max_iterations: int = 1000000,
     debug: bool = False,
+    debug_interval:int = 100000,
 ) -> Tuple[float, int]:
     """
     Compute the fragmentation threshold of a graph G using a given fragmentation method, ie the "fragmentation" parameter of the fragmentation method for which the graph is fragmented with probability 1/2
@@ -140,7 +146,8 @@ def bisection(
         The minimum number of iterations to perform for each step
     max_iterations : int
         The maximum number of iterations to perform for each step
-
+    debug_interval : int
+        The number of iterations between two debug prints
     Returns
     -------
     Tuple[float, int]
@@ -170,6 +177,7 @@ def bisection(
             is_fragmented=is_fragmented,
             fragment_settings=fragment_settings,
             debug=debug,
+            debug_interval=debug_interval,
         )
         if iteration_count == max_iterations:
             return middle, step_count
