@@ -6,16 +6,71 @@ import random
 from multiprocessing import Value, Pool
 
 def _is_fragmented(G: nx.Graph) -> bool:
+    """
+    Determine if a graph is fragmented
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to check
+
+    Returns
+    -------
+    bool
+        Whether the graph is fragmented
+    """
     return len(G.nodes) > 0 and not nx.is_connected(G)
 
-
 def _init_fragmentation_probability_worker(shared_n, shared_pfrag, shared_fragmentation_count):
+    """
+    This function is called by a multiprocessing.Pool to initialize shared values
+
+    Parameters
+    ----------
+    shared_n : multiprocessing.Value
+        The number of iterations
+    shared_pfrag : multiprocessing.Value
+        The fragmentation probability
+    shared_fragmentation_count : multiprocessing.Value
+        The number of fragmented graphs
+
+    Returns
+    -------
+    None
+    """
     global n,pfrag,fragmentation_count
     n = shared_n
     pfrag = shared_pfrag
     fragmentation_count = shared_fragmentation_count
 
 def _get_fragmentation_probability_worker(G,fragment,fragment_settings,stop_condition,stop_condition_settings,is_fragmented,debug,debug_interval):
+    """
+    This function is called by a multiprocessing.Pool to compute the fragmentation probability of a graph G
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to fragment
+    fragment : Callable[[nx.Graph, Dict], nx.Graph] | Callable[[nx.Graph], nx.Graph]
+        The fragmentation method to use
+    fragment_settings : Dict | None
+        The settings to pass to the fragmentation method
+    stop_condition : int | Callable[[int, float, Dict], bool]
+        The stop condition to use
+    stop_condition_settings : Dict | None
+        The settings to pass to the stop condition
+    is_fragmented : Callable[[nx.Graph], bool]
+        The function to use to check if the graph is fragmented
+    debug : bool
+        Whether to print debug information
+    debug_interval : int
+        The interval at which to print debug information
+
+
+    Returns
+    -------
+    None
+    """
     global n,fragmentation_count,pfrag
     is_incomplete = True
     while is_incomplete:
@@ -132,7 +187,7 @@ def _bisection_stop_condition(n: int, pfrag: float, settings: Dict, debug=False)
     max_iterations = settings.get("max_iterations", 1000000)
     min_iterations = settings.get("min_iterations", 1000)
     if(debug):
-        print("BISECTION PROGRESS : " +str(round(100 * 4 * n * ((pfrag - 0.5) ** 2) / INV_PROBA, 3)) )
+        print("BISECTION PROGRESS : " +str(round(100 * 4 * n * ((pfrag - 0.5) ** 2) / INV_PROBA, 3)))
     return n >= min_iterations and (
         4 * n * ((pfrag - 0.5) ** 2) >= INV_PROBA or n >= max_iterations
     )

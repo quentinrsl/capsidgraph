@@ -16,7 +16,7 @@ from typing import Tuple
 
 
 def get_fragmentation_probability_random_node_removal(
-    G: nx.Graph, removal_probability: float, iterations: int, debug: bool = False
+    G: nx.Graph, removal_probability: float, iterations: int, process_number: int = 1 ,debug: bool = False, debug_interval: int=100000
 ) -> float:
     """
     Compute the probability of a graph fragmenting when randomly removing every node with a given probability.
@@ -25,10 +25,16 @@ def get_fragmentation_probability_random_node_removal(
     ----------
     G : nx.Graph
         The graph to analyse
-    removal_probability : float
+    removal_probability: float
         The probability to to remove every node, a float between 0 and 1.
-    iterations : int
+    iterations: int
         The number of iterations used for the estiamtion
+    process_number: int, optional
+        The number of processes to use for the estimation
+    debug: bool, optional
+        Whether to print debug information
+    debug_interval: int, optional
+        The interval at which to print debug information
 
     Returns
     -------
@@ -44,12 +50,14 @@ def get_fragmentation_probability_random_node_removal(
             "fragmentation_type": "nodes",
         },
         debug=debug,
+        debug_interval=debug_interval,
+        process_number=process_number
     )
     return pfrag
 
 
 def get_fragmentation_probability_random_edge_removal(
-    G: nx.Graph, removal_probability: float, iterations: int, debug: bool = False
+    G: nx.Graph, removal_probability: float, iterations: int, process_number : int=1,debug: bool = False, debug_interval: int=100000
 ) -> float:
     """
     Compute the probability of a graph fragmenting when randomly removing every edge with a given probability.
@@ -62,6 +70,12 @@ def get_fragmentation_probability_random_edge_removal(
         The probability to to remove every edge, a float between 0 and 1.
     iterations : int
         The number of iterations used for the estiamtion
+    process_number: int, optional
+        The number of processes to use for the estimation
+    debug: bool, optional
+        Whether to print debug information
+    debug_interval: int, optional
+        The interval at which to print debug information
 
     Returns
     -------
@@ -77,12 +91,14 @@ def get_fragmentation_probability_random_edge_removal(
             "fragmentation_type": "edges",
         },
         debug=debug,
+        debug_interval=debug_interval,
+        process_number=process_number
     )
     return pfrag
 
 
 def get_fragmentation_probability_energy_node_removal(
-    G: nx.Graph, removal_energy: float, iterations: int, debug: bool = False
+    G: nx.Graph, removal_energy: float, iterations: int, process_number: int = 1, debug: bool = False, debug_interval: int=100000
 ) -> float:
     """
     Compute the probability of a graph fragmenting when removing random nodes util a fraction of the graph "energy" has been removed.
@@ -97,6 +113,12 @@ def get_fragmentation_probability_energy_node_removal(
         The fraction of the graph energy to remove, a float between 0 and 1.
     iterations : int
         The number of iterations used for the estiamtion
+    process_number: int, optional
+        The number of processes to use for the estimation
+    debug: bool, optional
+        Whether to print debug information
+    debug_interval: int, optional
+        The interval at which to print debug information
 
     Returns
     -------
@@ -117,12 +139,14 @@ def get_fragmentation_probability_energy_node_removal(
             "fragmentation": removal_energy,
         },
         debug=debug,
+        debug_interval=debug_interval,
+        process_number=process_number
     )
     return pfrag
 
 
 def get_fragmentation_probability_energy_edge_removal(
-    G: nx.Graph, removal_energy: float, iterations: int, debug: bool = False
+    G: nx.Graph, removal_energy: float, iterations: int, process_number: int = 1, debug: bool = False, debug_interval: int=100000
 ) -> float:
     """
     Compute the probability of a graph fragmenting when removing random edges util a fraction of the graph "energy" has been removed.
@@ -137,6 +161,12 @@ def get_fragmentation_probability_energy_edge_removal(
         The fraction of the graph energy to remove, a float between 0 and 1.
     iterations : int
         The number of iterations used for the estiamtion
+    process_number: int, optional
+        The number of processes to use for the estimation
+    debug: bool, optional
+        Whether to print debug information
+    debug_interval: int, optional
+        The interval at which to print debug information
 
     Returns
     -------
@@ -151,6 +181,8 @@ def get_fragmentation_probability_energy_edge_removal(
             "fragmentation": removal_energy,
         },
         debug=debug,
+        debug_interval=debug_interval,
+        process_number=process_number
     )
     return pfrag
 
@@ -161,7 +193,9 @@ def get_fragmentation_probability_threshold_node(
     steps: int,
     min_iterations: int = 1000,
     max_iterations: int = 1000000,
+    process_number: int = 1,
     debug: bool = False,
+    debug_interval: int = 100000,
 ) -> Tuple[float, int]:
     """
     Estimate the probability of node removal that will fragment the graph with a probability of 1/2.
@@ -178,8 +212,12 @@ def get_fragmentation_probability_threshold_node(
         The minimum number of iterations for each bisection step
     max_iterations : int, optional
         The maximum number of iterations for each bisection step
+    process_number: int, optional
+        The number of processes to use for the estimation
     debug : bool, optional
         If True, print debug information
+    debug_interval : int, optional
+        The interval at which to print debug information
 
     Returns
     -------
@@ -195,6 +233,8 @@ def get_fragmentation_probability_threshold_node(
         min_iterations=min_iterations,
         max_iterations=max_iterations,
         debug=debug,
+        debug_interval=debug_interval,
+        process_number=process_number
     )
     return pf, n
 
@@ -205,7 +245,9 @@ def get_fragmentation_probability_threshold_edge(
     steps: int,
     min_iterations: int = 1000,
     max_iterations: int = 1000000,
+    process_number: int = 1,
     debug: bool = False,
+    debug_interval: int = 100000,
 ) -> Tuple[float, int]:
     """
     Estimate the probability of edge removal that will fragment the graph with a probability of 1/2.
@@ -222,8 +264,12 @@ def get_fragmentation_probability_threshold_edge(
         The minimum number of iterations for each bisection step
     max_iterations : int, optional
         The maximum number of iterations for each bisection step
-    debug : bool, optional
-        If True, print debug information
+    process_number: int, optional
+        The number of processes to use for the estimation
+    debug: bool, optional
+        Whether to print debug information
+    debug_interval: int, optional
+        The interval at which to print debug information
 
     Returns
     -------
@@ -239,6 +285,8 @@ def get_fragmentation_probability_threshold_edge(
         min_iterations=min_iterations,
         max_iterations=max_iterations,
         debug=debug,
+        debug_interval=debug_interval,
+        process_number=process_number
     )
     return pf, n
 
@@ -249,7 +297,9 @@ def get_fragmentation_energy_threshold_edge(
     steps: int,
     min_iterations: int = 1000,
     max_iterations: int = 1000000,
+    process_number: int = 1,
     debug: bool = False,
+    debug_interval: int = 100000,
 ) -> Tuple[float, int]:
     """
     Estimate the fraction of the graph energy that needs to be removed (by randomly removing edges) to fragment the graph with a probability of 1/2.
@@ -267,8 +317,12 @@ def get_fragmentation_energy_threshold_edge(
         The minimum number of iterations for each bisection step
     max_iterations : int, optional
         The maximum number of iterations for each bisection step
-    debug : bool, optional
-        If True, print debug information
+    process_number: int, optional
+        The number of processes to use for the estimation
+    debug: bool, optional
+        Whether to print debug information
+    debug_interval: int, optional
+        The interval at which to print debug information
 
     Returns
     -------
@@ -284,6 +338,8 @@ def get_fragmentation_energy_threshold_edge(
         min_iterations=min_iterations,
         max_iterations=max_iterations,
         debug=debug,
+        debug_interval=debug_interval,
+        process_number=process_number
     )
     return pf, n
 
@@ -294,7 +350,9 @@ def get_fragmentation_energy_threshold_node(
     steps: int,
     min_iterations: int = 1000,
     max_iterations: int = 1000000,
+    process_number: int = 1,
     debug: bool = False,
+    debug_interval: int = 100000,
 ) -> Tuple[float, int]:
     """
     Estimate the fraction of the graph energy that needs to be removed (by randomly removing nodes) to fragment the graph with a probability of 1/2.
@@ -312,6 +370,12 @@ def get_fragmentation_energy_threshold_node(
         The minimum number of iterations for each bisection step
     max_iterations : int, optional
         The maximum number of iterations for each bisection step
+    process_number: int, optional
+        The number of processes to use for the estimation
+    debug: bool, optional
+        Whether to print debug information
+    debug_interval: int, optional
+        The interval at which to print debug information
 
     Returns
     -------
@@ -329,5 +393,7 @@ def get_fragmentation_energy_threshold_node(
         min_iterations=min_iterations,
         max_iterations=max_iterations,
         debug=debug,
+        debug_interval=debug_interval,
+        process_number=process_number
     )
     return pf, n
