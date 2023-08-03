@@ -43,7 +43,7 @@ def _init_fragmentation_probability_worker(shared_n, shared_pfrag, shared_fragme
     pfrag = shared_pfrag
     fragmentation_count = shared_fragmentation_count
 
-def _get_fragmentation_probability_worker(G,fragment,fragment_settings,stop_condition,stop_condition_settings,is_fragmented,debug,debug_interval):
+def _get_fragmentation_probability_worker(G,fragment,fragment_settings,stop_condition,stop_condition_settings,is_fragmented,debug,debug_interval, batch_size=1000):
     """
     This function is called by a multiprocessing.Pool to compute the fragmentation probability of a graph G
 
@@ -65,6 +65,8 @@ def _get_fragmentation_probability_worker(G,fragment,fragment_settings,stop_cond
         Whether to print debug information
     debug_interval : int
         The interval at which to print debug information
+    batch_size : int
+        The number of iterations to perform before updating shared values
 
 
     Returns
@@ -74,15 +76,18 @@ def _get_fragmentation_probability_worker(G,fragment,fragment_settings,stop_cond
     global n,fragmentation_count,pfrag
     is_incomplete = True
     while is_incomplete:
-        if len(signature(fragment).parameters) == 2:
-            G_ = fragment(G, fragment_settings)
-        else:
-            G_ = fragment(G)
-        incr = 1 if is_fragmented(G_) else 0
+        inc_fragment = 0
+        for i in range(batch_size):
+            if len(signature(fragment).parameters) == 2:
+                G_ = fragment(G, fragment_settings)
+            else:
+                G_ = fragment(G)
+            if _is_fragmented(G_):
+                inc_fragment += 1
         #We acquire the semaphore to update values and compute stop_condition
         with n.get_lock():
-            n.value += 1
-            fragmentation_count.value += incr
+            n.value += batch_size
+            fragmentation_count.value += inc_fragment
             pfrag.value = fragmentation_count.value / n.value
             is_incomplete = (type(stop_condition) == int
                 and n.value < stop_condition
