@@ -186,8 +186,9 @@ def _bisection_stop_condition(n: int, pfrag: float, settings: Dict, debug=False)
     INV_PROBA = 1 / settings["error_probability"]
     max_iterations = settings.get("max_iterations", 1000000)
     min_iterations = settings.get("min_iterations", 1000)
+    progress = 4 * n * ((pfrag - 0.5) ** 2) / INV_PROBA
     if(debug):
-        print("BISECTION PROGRESS : " +str(round(100 * 4 * n * ((pfrag - 0.5) ** 2) / INV_PROBA, 3)))
+        print(str(n) + " iterations | "+ str(round(100 * progress, 3)) + "% DONE | ESTIMATED NUMBER OF ITERATIONS : " + str(round(n / progress)) + "       ", end="\r")
     return n >= min_iterations and (
         4 * n * ((pfrag - 0.5) ** 2) >= INV_PROBA or n >= max_iterations
     )

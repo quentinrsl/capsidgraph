@@ -49,15 +49,15 @@ G = create_icosahedral_capsid_graph(face_edges, axis, energy)
 
 def worker(p):
     print("Computing for p=", p)
-    if fragmentation_type == "nodes":
-        return get_fragmentation_probability_energy_node_removal(G, p, iterations,debug=True)
-    elif fragmentation_type == "edges":
-        return get_fragmentation_probability_energy_edge_removal(G, p, iterations,debug=True)
 
 
 if __name__ == "__main__":
-    with Pool(processes) as pool:
-        Y = pool.map(worker, X)
+    Y = []
+    for p in X:
+        if fragmentation_type == "nodes":
+            Y.append(get_fragmentation_probability_energy_node_removal(G, p, iterations,debug=True, process_number=processes))
+        elif fragmentation_type == "edges":
+            Y.append(get_fragmentation_probability_energy_edge_removal(G, p, iterations,debug=True, process_number=processes))
     print(Y)
     plt.plot(X, Y)
     plt.show()

@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from multiprocessing import Pool
 from capsidgraph.generator import (
     icosahedral_patterns,
     create_icosahedral_face_edges,
@@ -29,17 +28,13 @@ G = create_icosahedral_capsid_graph(face_edges, axis)
 print("T=", Tscale * (h * h + k * k + h * k))
 
 
-def worker(p):
-    print("Computing for p=", p)
-    if fragmentation_type == "nodes":
-        return get_fragmentation_probability_random_node_removal(G, p, iterations)
-    elif fragmentation_type == "edges":
-        return get_fragmentation_probability_random_edge_removal(G, p, iterations)
-
-
 if __name__ == "__main__":
-    with Pool(processes) as pool:
-        Y = pool.map(worker, X)
+    Y = []
+    for p in X:
+        if fragmentation_type == "nodes":
+            Y.append(get_fragmentation_probability_random_node_removal(G, p, iterations, debug=True, process_number=processes))
+        elif fragmentation_type == "edges":
+            Y.append(get_fragmentation_probability_random_edge_removal(G, p, iterations, debug=True, process_number=processes))
     print(Y)
     plt.plot(X, Y)
     plt.show()
