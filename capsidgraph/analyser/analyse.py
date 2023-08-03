@@ -81,6 +81,9 @@ def _get_fragmentation_probability_worker(G,fragment,fragment_settings,stop_cond
         incr = 1 if is_fragmented(G_) else 0
         #We acquire the semaphore to update values and compute stop_condition
         with n.get_lock():
+            n.value += 1
+            fragmentation_count.value += incr
+            pfrag.value = fragmentation_count.value / n.value
             is_incomplete = (type(stop_condition) == int
                 and n.value < stop_condition
                 or (
@@ -88,9 +91,6 @@ def _get_fragmentation_probability_worker(G,fragment,fragment_settings,stop_cond
                     and not stop_condition(n.value, pfrag.value, stop_condition_settings, debug=(debug and n.value%debug_interval == 0))
                 )
                 )
-            n.value += 1
-            fragmentation_count.value += incr
-            pfrag.value = fragmentation_count.value / n.value
 
 
 def get_framentation_probability(
@@ -154,7 +154,7 @@ def get_framentation_probability(
             shared_n.value,
             "got p(frag)=",
             shared_pfrag.value,
-            1000 * (time.time() - start) / shared_n.value,
+            1000 * process_number * (time.time() - start) / shared_n.value,
             "ms/sim",
         )
     return shared_pfrag.value, shared_n.value
