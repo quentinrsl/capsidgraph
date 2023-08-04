@@ -82,7 +82,7 @@ def _get_fragmentation_probability_worker(G,fragment,fragment_settings,stop_cond
                 G_ = fragment(G, fragment_settings)
             else:
                 G_ = fragment(G)
-            if _is_fragmented(G_):
+            if is_fragmented(G_):
                 inc_fragment += 1
         #We acquire the semaphore to update values and compute stop_condition
         with n.get_lock():
@@ -102,12 +102,12 @@ def _get_fragmentation_probability_multithreaded (
     G: nx.Graph,
     stop_condition: int | Callable[[int, float, Dict], bool],
     fragment: Callable[[nx.Graph, Dict], nx.Graph] | Callable[[nx.Graph], nx.Graph],
-    stop_condition_settings: Dict | None ,
-    fragment_settings: Dict | None ,
-    is_fragmented: Callable[[nx.Graph], bool] ,
-    process_number: int ,
-    debug: bool ,
-    debug_interval: int ,
+    stop_condition_settings: Dict | None,
+    fragment_settings: Dict | None,
+    is_fragmented: Callable[[nx.Graph], bool],
+    process_number: int, 
+    debug: bool,
+    debug_interval: int,
 ) -> Tuple[float, int]:
     """
     Compute the fragmentation probability of a graph G using a given fragmentation method by using multiple processes for the simulations
@@ -171,7 +171,7 @@ def _get_fragmentation_probability_singlethreaded(
     fragment: Callable[[nx.Graph, Dict], nx.Graph] | Callable[[nx.Graph], nx.Graph],
     stop_condition_settings: Dict | None ,
     fragment_settings: Dict | None ,
-    is_fragmented: Callable[[nx.Graph], bool] ,
+    is_fragmented,
     debug: bool ,
     debug_interval: int ,
 ) -> Tuple[float, int]:
@@ -311,7 +311,7 @@ def _bisection_stop_condition(n: int, pfrag: float, settings: Dict, debug=False)
     max_iterations = settings.get("max_iterations", 1000000)
     min_iterations = settings.get("min_iterations", 1000)
     progress = 4 * n * ((pfrag - 0.5) ** 2) / INV_PROBA
-    if(debug):
+    if(debug and n > 0):
         print(str(n) + " iterations | "+ str(round(100 * progress, 3)) + "% DONE | ESTIMATED NUMBER OF ITERATIONS : " + str(round(n / progress)) + "       ", end="\r")
     return n >= min_iterations and (
         4 * n * ((pfrag - 0.5) ** 2) >= INV_PROBA or n >= max_iterations
