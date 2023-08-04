@@ -63,10 +63,25 @@ class TestAnalyser(unittest.TestCase):
                 "fragmentation": 0.5,
                 "fragmentation_type": "nodes",
             },
+            process_number=1
         )
         self.assertLess(pfrag, 1)
         self.assertGreater(pfrag, 0)
         self.assertEqual(n, 1000)
+
+        pfrag, n = get_framentation_probability(
+            G,
+            1000,
+            probability_fragment,
+            fragment_settings={
+                "fragmentation": 0.5,
+                "fragmentation_type": "nodes",
+            },
+            process_number=2
+        )
+        self.assertLess(pfrag, 1)
+        self.assertGreater(pfrag, 0)
+        self.assertGreaterEqual(n, 1000)
 
         pfrag, n = get_framentation_probability(
             G,

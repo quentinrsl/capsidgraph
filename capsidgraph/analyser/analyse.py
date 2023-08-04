@@ -98,6 +98,148 @@ def _get_fragmentation_probability_worker(G,fragment,fragment_settings,stop_cond
                 )
 
 
+def _get_fragmentation_probability_multithreaded (
+    G: nx.Graph,
+    stop_condition: int | Callable[[int, float, Dict], bool],
+    fragment: Callable[[nx.Graph, Dict], nx.Graph] | Callable[[nx.Graph], nx.Graph],
+    stop_condition_settings: Dict | None ,
+    fragment_settings: Dict | None ,
+    is_fragmented: Callable[[nx.Graph], bool] ,
+    process_number: int ,
+    debug: bool ,
+    debug_interval: int ,
+) -> Tuple[float, int]:
+    """
+    Compute the fragmentation probability of a graph G using a given fragmentation method by using multiple processes for the simulations
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to fragment
+    stop_condition : int | Callable[[int, float, Dict], bool]
+        The stop condition for the fragmentation process. If an int is given, the process will stop after this number of iterations. If a callable is given, the process will stop when the callable returns True. The callable takes as parameters the number of iterations, the current estimated fragmentation probability and the stop_condition_settings
+    fragment : Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None]
+        The fragmentation method to use. It must take as parameter a graph and a dict of settings and return the fragmented graph. If the fragmentation method does not take settings, it can be given without the settings parameter
+    stop_condition_settings : Dict | None
+        The settings to pass to the stop condition callable
+    fragment_settings : Dict | None
+        The settings to pass to the fragmentation method
+    process_number: int
+        Number of processes to spawn to perform the computation
+    debug : bool
+        If True, print debug information
+    debug_interval : int
+        The number of interations between two debug messages on the progress
+
+    Returns
+    -------
+    Tuple[float, bool]
+        The estimated fragmentation probability and an int representing the number of iterations used to compute it
+    """
+    start = time.time()
+
+    shared_fragmentation_count = Value("i",True)
+    shared_pfrag = Value("f",True)
+    shared_n = Value("i", True) 
+    shared_fragmentation_count.value = 0
+    shared_n.value = 0
+
+
+    with Pool(process_number,initializer=_init_fragmentation_probability_worker,initargs=(shared_n,shared_pfrag,shared_fragmentation_count)) as pool:
+        for i in range(process_number):
+            pool.apply_async(_get_fragmentation_probability_worker, (G,fragment,fragment_settings,stop_condition,stop_condition_settings,is_fragmented,debug,debug_interval))
+        pool.close()
+        pool.join()
+    if debug:
+        print(
+            "fragmentation setttings=",
+            fragment_settings,
+            "stop_condition_settings=",
+            stop_condition_settings,
+            "with n=",
+            shared_n.value,
+            "got p(frag)=",
+            shared_pfrag.value,
+            1000 * process_number * (time.time() - start) / shared_n.value,
+            "ms/sim",
+        )
+    return shared_pfrag.value, shared_n.value
+
+def _get_fragmentation_probability_singlethreaded(
+    G: nx.Graph,
+    stop_condition: int | Callable[[int, float, Dict], bool],
+    fragment: Callable[[nx.Graph, Dict], nx.Graph] | Callable[[nx.Graph], nx.Graph],
+    stop_condition_settings: Dict | None ,
+    fragment_settings: Dict | None ,
+    is_fragmented: Callable[[nx.Graph], bool] ,
+    debug: bool ,
+    debug_interval: int ,
+) -> Tuple[float, int]:
+    """
+    Compute the fragmentation probability of a graph G using a given fragmentation method by using a silngle processes for the simulations
+
+    Parameters
+    ----------
+    G : nx.Graph
+        The graph to fragment
+    stop_condition : int | Callable[[int, float, Dict], bool]
+        The stop condition for the fragmentation process. If an int is given, the process will stop after this number of iterations. If a callable is given, the process will stop when the callable returns True. The callable takes as parameters the number of iterations, the current estimated fragmentation probability and the stop_condition_settings
+    fragment : Callable[[nx.Graph, Dict], None] | Callable[[nx.Graph], None]
+        The fragmentation method to use. It must take as parameter a graph and a dict of settings and return the fragmented graph. If the fragmentation method does not take settings, it can be given without the settings parameter
+    stop_condition_settings : Dict | None
+        The settings to pass to the stop condition callable
+    fragment_settings : Dict | None
+        The settings to pass to the fragmentation method
+    process_number: int
+        Number of processes to spawn to perform the computation
+    debug : bool
+        If True, print debug information
+    debug_interval : int
+        The number of interations between two debug messages on the progress
+
+    Returns
+    -------
+    Tuple[float, bool]
+        The estimated fragmentation probability and an int representing the number of iterations used to compute it
+    """
+    start = time.time()
+    fragmentation_count = 0
+    pfrag = 0
+    n = 0
+    while (
+        type(stop_condition) == int
+        and n < stop_condition
+        or (
+            callable(stop_condition)
+            and not stop_condition(n, pfrag, stop_condition_settings, debug=(debug and n%debug_interval == 0))
+        )
+    ):
+        if len(signature(fragment).parameters) == 2:
+            G_ = fragment(G, fragment_settings)
+        else:
+            G_ = fragment(G)
+
+        n += 1
+        if is_fragmented(G_):
+            fragmentation_count += 1
+        pfrag = fragmentation_count / n
+    if debug:
+        print(
+            "fragmentation setttings=",
+            fragment_settings,
+            "stop_condition_settings=",
+            stop_condition_settings,
+            "with n=",
+            n,
+            "got p(frag)=",
+            pfrag,
+            1000 * (time.time() - start) / n,
+            "ms/sim",
+        )
+    return pfrag, n
+
+
+
 def get_framentation_probability(
     G: nx.Graph,
     stop_condition: int | Callable[[int, float, Dict], bool],
@@ -136,33 +278,10 @@ def get_framentation_probability(
     Tuple[float, bool]
         The estimated fragmentation probability and an int representing the number of iterations used to compute it
     """
-    start = time.time()
-    shared_fragmentation_count = Value("i",True)
-    shared_pfrag = Value("f",True)
-    shared_n = Value("i", True) 
-    shared_fragmentation_count.value = 0
-    shared_n.value = 0
-
-
-    with Pool(process_number,initializer=_init_fragmentation_probability_worker,initargs=(shared_n,shared_pfrag,shared_fragmentation_count)) as pool:
-        for i in range(process_number):
-            pool.apply_async(_get_fragmentation_probability_worker, (G,fragment,fragment_settings,stop_condition,stop_condition_settings,is_fragmented,debug,debug_interval))
-        pool.close()
-        pool.join()
-    if debug:
-        print(
-            "fragmentation setttings=",
-            fragment_settings,
-            "stop_condition_settings=",
-            stop_condition_settings,
-            "with n=",
-            shared_n.value,
-            "got p(frag)=",
-            shared_pfrag.value,
-            1000 * process_number * (time.time() - start) / shared_n.value,
-            "ms/sim",
-        )
-    return shared_pfrag.value, shared_n.value
+    if(process_number == 1):
+        return _get_fragmentation_probability_singlethreaded(G,stop_condition,fragment,stop_condition_settings, fragment_settings,is_fragmented,debug,debug_interval)
+    elif(process_number > 1):
+        return _get_fragmentation_probability_multithreaded(G,stop_condition,fragment,stop_condition_settings, fragment_settings,is_fragmented, process_number,debug,debug_interval)
 
 
 def _bisection_stop_condition(n: int, pfrag: float, settings: Dict, debug=False) -> bool:
