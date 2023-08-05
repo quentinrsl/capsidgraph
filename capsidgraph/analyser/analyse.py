@@ -154,8 +154,6 @@ def _get_fragmentation_probability_multithreaded (
         print(
             "fragmentation setttings=",
             fragment_settings,
-            "stop_condition_settings=",
-            stop_condition_settings,
             "with n=",
             shared_n.value,
             "got p(frag)=",
@@ -227,8 +225,6 @@ def _get_fragmentation_probability_singlethreaded(
         print(
             "fragmentation setttings=",
             fragment_settings,
-            "stop_condition_settings=",
-            stop_condition_settings,
             "with n=",
             n,
             "got p(frag)=",
@@ -312,7 +308,7 @@ def _bisection_stop_condition(n: int, pfrag: float, settings: Dict, debug=False)
     min_iterations = settings.get("min_iterations", 1000)
     progress = 4 * n * ((pfrag - 0.5) ** 2) / INV_PROBA
     if(debug and n > 0):
-        print(str(n) + " iterations | "+ str(round(100 * progress, 3)) + "% DONE | ESTIMATED NUMBER OF ITERATIONS : " + str(round(n / progress)) + "       ", end="\r")
+        print(str(n) + " iterations | "+ str(round(100 * progress, 3)) + "% DONE | ESTIMATED NUMBER OF ITERATIONS LEFT : " + str(round(n / progress) - n)+ "       ", end="\r")
     return n >= min_iterations and (
         4 * n * ((pfrag - 0.5) ** 2) >= INV_PROBA or n >= max_iterations
     )
@@ -473,7 +469,7 @@ def get_hole_size(fragmented_graph: nx.Graph, original_graph: nx.Graph) -> int:
         hole = original_graph.subgraph(original_graph.nodes - largest_component)
         if len(hole.nodes) == 0:
             return 0
-        hole_size = len(max(nx.connected_components(hole), key=len))
+        hole_size = len(min(nx.connected_components(hole), key=len))
         if min_hole_size == None or hole_size < min_hole_size:
             min_hole_size = hole_size
     return min_hole_size
