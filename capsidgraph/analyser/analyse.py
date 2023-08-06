@@ -464,15 +464,15 @@ def get_hole_size(fragmented_graph: nx.Graph, original_graph: nx.Graph) -> int:
     largest_components = [
         c for c in connected_components if len(c) == largest_component_size
     ]
-    min_hole_size = None
+    max_hole_size = None
     for largest_component in largest_components:
         hole = original_graph.subgraph(original_graph.nodes - largest_component)
         if len(hole.nodes) == 0:
             return 0
-        hole_size = len(min(nx.connected_components(hole), key=len))
-        if min_hole_size == None or hole_size < min_hole_size:
-            min_hole_size = hole_size
-    return min_hole_size
+        hole_size = len(max(nx.connected_components(hole), key=len))
+        if max_hole_size == None or hole_size > max_hole_size:
+            max_hole_size = hole_size
+    return max_hole_size
 
 
 def get_hole_size_distribution(

@@ -115,7 +115,8 @@ class TestAnalyser(unittest.TestCase):
         remaining_energy = 0
         for e in G_.edges:
             remaining_energy += G_.edges[e]["energy"]
-        self.assertLessEqual(remaining_energy, 1 - energy)
+        print(remaining_energy, 1 - energy)
+        self.assertAlmostEqual(remaining_energy, 1 - energy)
 
     def test_fragment_energy_nodes(self):
         G = nx.read_adjlist("tests/testcase1.adjlist")
