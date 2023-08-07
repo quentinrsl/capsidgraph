@@ -236,7 +236,7 @@ def _get_fragmentation_probability_singlethreaded(
 
 
 
-def get_framentation_probability(
+def get_fragmentation_probability(
     G: nx.Graph,
     stop_condition: int | Callable[[int, float, Dict], bool],
     fragment: Callable[[nx.Graph, Dict], nx.Graph] | Callable[[nx.Graph], nx.Graph],
@@ -368,7 +368,7 @@ def bisection(
         middle = (lower_bound + upper_bound) / 2
         step_count += 1
         fragment_settings["fragmentation"] = middle
-        pfrag, iteration_count = get_framentation_probability(
+        pfrag, iteration_count = get_fragmentation_probability(
             G,
             _bisection_stop_condition,
             fragment,

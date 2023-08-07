@@ -3,7 +3,7 @@ import networkx as nx
 from capsidgraph.analyser.analyse import (
     get_hole_size,
     _bisection_stop_condition,
-    get_framentation_probability,
+    get_fragmentation_probability,
     bisection,
 )
 from capsidgraph.analyser.fragment import (
@@ -55,7 +55,7 @@ class TestAnalyser(unittest.TestCase):
 
     def test_get_fragmentation_probability(self):
         G = nx.read_adjlist("tests/testcase1.adjlist")
-        pfrag, n = get_framentation_probability(
+        pfrag, n = get_fragmentation_probability(
             G,
             1000,
             probability_fragment,
@@ -69,7 +69,7 @@ class TestAnalyser(unittest.TestCase):
         self.assertGreater(pfrag, 0)
         self.assertEqual(n, 1000)
 
-        pfrag, n = get_framentation_probability(
+        pfrag, n = get_fragmentation_probability(
             G,
             1000,
             probability_fragment,
@@ -83,7 +83,7 @@ class TestAnalyser(unittest.TestCase):
         self.assertGreater(pfrag, 0)
         self.assertGreaterEqual(n, 1000)
 
-        pfrag, n = get_framentation_probability(
+        pfrag, n = get_fragmentation_probability(
             G,
             _bisection_stop_condition,
             probability_fragment,

@@ -1,6 +1,6 @@
 import networkx as nx
 from .analyse import (
-    get_framentation_probability,
+    get_fragmentation_probability,
     bisection,
     get_fragment_size_distribution,
     get_hole_size_distribution,
@@ -41,7 +41,7 @@ def get_fragmentation_probability_random_node_removal(
     float
         The estimated probability of the graph fragmenting.
     """
-    pfrag, n = get_framentation_probability(
+    pfrag, n = get_fragmentation_probability(
         G,
         iterations,
         probability_fragment,
@@ -82,7 +82,7 @@ def get_fragmentation_probability_random_edge_removal(
     float
         The estimated probability of the graph fragmenting.
     """
-    pfrag, n = get_framentation_probability(
+    pfrag, n = get_fragmentation_probability(
         G,
         iterations,
         probability_fragment,
@@ -131,7 +131,7 @@ def get_fragmentation_probability_energy_node_removal(
     """
     G_ = G.copy()
     init_nodes_energy(G_)
-    pfrag, n = get_framentation_probability(
+    pfrag, n = get_fragmentation_probability(
         G_,
         iterations,
         energy_nodes_fragment,
@@ -173,7 +173,7 @@ def get_fragmentation_probability_energy_edge_removal(
     float
         The estimated probability of the graph fragmenting.
     """
-    pfrag, n = get_framentation_probability(
+    pfrag, n = get_fragmentation_probability(
         G,
         iterations,
         energy_edges_fragment,
