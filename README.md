@@ -70,7 +70,7 @@ Consider the set of connected components of maximal size $\Set{C_0=(V_0, E_0),..
 
 let $H_i$ be the size of> the largest connected component of $C_i$
 
-Then the largest hole size of $G'$, $H(G') = \max_{0 \leq j \leq p }{H_j}$
+Then the largest hole size of $G'$, $H(G') = \min_{0 \leq j \leq p }{H_j}$
 
 We say that a graph is _hole-fragmented_ if $H(G') \geq \lfloor \frac{|V|}{2} \rfloor$
 
