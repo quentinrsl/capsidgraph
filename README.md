@@ -126,9 +126,11 @@ Given one triangular face of an icosahedron as described above, the graph of an 
 
 Once all 20 triangular faces have been correctly assembled into an icosahedral surface lattice, the associated graph is fully assembled. In our example, the graph looks like this (graph visualised with the `draw` function of networkx)  
 
-<img src="img/graph4.png" height=300 alt="The final graph">  
+<img src="img/graph4.png" height=300 alt="The final graph">
+
 This construction is implemented in the function `create_icosahedral_capsid_graph` which takes the following parameters as input:
-*  `face_edges` : a list of edges corresponding to the edges of a triangular face;
+
+* `face_edges` : a list of edges corresponding to the edges of a triangular face;
 * `triangle_vertices` : the three vertices delimiting the faces (tuple of 3 points);
 * `bond_strength` : optional, this list needs to have the same length as `face_edges`. This parameter defines the bond energy of every vertex of the capsid graph, where  `bond_strength[i]` corresponds to the energy of the bond `face_edges[i]`.
 
