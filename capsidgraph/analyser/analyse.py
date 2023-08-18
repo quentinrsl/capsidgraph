@@ -383,7 +383,7 @@ def bisection(
             debug_interval=debug_interval,
             process_number=process_number
         )
-        if iteration_count == max_iterations:
+        if iteration_count >= max_iterations:
             return middle, step_count
         elif pfrag > 0.5:
             upper_bound = middle
