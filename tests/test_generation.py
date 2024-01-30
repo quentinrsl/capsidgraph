@@ -17,8 +17,8 @@ from capsidgraph.generator import (
 from math import sqrt
 
 
-def energy_edge_match(e1, e2):
-    return e1["energy"] == e2["energy"]
+def strength_edge_match(e1, e2):
+    return e1["strength"] == e2["strength"]
 
 
 class TestGeneration(unittest.TestCase):
@@ -125,10 +125,10 @@ class TestGeneration(unittest.TestCase):
         Ea = 1
         Eb = 2
         Ec = 3
-        energy = [Ec, Eb, Eb, Ec, Ea, Ec, Eb, Ec, Ea, Ec, Ec, Eb, Eb, Ea, Eb]
-        G1 = create_icosahedral_capsid_graph(faceEdges, axis, bond_strength=energy)
+        strength = [Ec, Eb, Eb, Ec, Ea, Ec, Eb, Ec, Ea, Ec, Ec, Eb, Eb, Ea, Eb]
+        G1 = create_icosahedral_capsid_graph(faceEdges, axis, bond_strength=strength)
         G2 = nx.read_edgelist("tests/testcase2.edgelist")
-        self.assertTrue(nx.is_isomorphic(G1, G2, edge_match=energy_edge_match))
+        self.assertTrue(nx.is_isomorphic(G1, G2, edge_match=strength_edge_match))
 
     def test_create_icosahedral_graph_floating(self):
         P = icosahedral_patterns.PATTERN_6434
@@ -160,7 +160,7 @@ class TestGeneration(unittest.TestCase):
 
         G1 = create_cubic_capsid_graph(face, square_vertices, w)
         G2 = nx.read_edgelist("tests/testcase4.edgelist")
-        nx.is_isomorphic(G1, G2, edge_match=energy_edge_match)
+        nx.is_isomorphic(G1, G2, edge_match=strength_edge_match)
 
     def test_texture_generator(self):
         from PIL import Image

@@ -8,10 +8,10 @@ from .analyse import (
 )
 from .fragment import (
     probability_fragment,
-    energy_edges_fragment,
-    energy_nodes_fragment,
+    strength_edges_fragment,
+    strength_nodes_fragment,
 )
-from .util import _init_nodes_energy as init_nodes_energy
+from .util import _init_nodes_strength as init_nodes_strength
 from typing import Tuple
 
 
@@ -97,20 +97,20 @@ def get_fragmentation_probability_random_edge_removal(
     return pfrag
 
 
-def get_fragmentation_probability_energy_node_removal(
-    G: nx.Graph, removal_energy: float, iterations: int, process_number: int = 1, debug: bool = False, debug_interval: int=100000
+def get_fragmentation_probability_strength_node_removal(
+    G: nx.Graph, removed_strength: float, iterations: int, process_number: int = 1, debug: bool = False, debug_interval: int=100000
 ) -> float:
     """
-    Compute the probability of a graph fragmenting when removing random nodes util a fraction of the graph "energy" has been removed.
-    Each node has a probability weight proportional to the inverse of the sum of the `energy` attributes of the edges connected to it.
-    The energy of the graph is defined as the sum of the energy of all edges.
+    Compute the probability of a graph fragmenting when removing random nodes util a fraction of the graph "strength" has been removed.
+    Each node has a probability weight proportional to the inverse of the sum of the `strength` attributes of the edges connected to it.
+    The strength of the graph is defined as the sum of the strength of all edges.
 
     Parameters
     ----------
     G : nx.Graph
         The graph to analyse
-    removal_energy : float
-        The fraction of the graph energy to remove, a float between 0 and 1.
+    removed_strength : float
+        The fraction of the graph stength to remove, a float between 0 and 1.
     iterations : int
         The number of iterations used for the estiamtion
     process_number: int, optional
@@ -127,16 +127,16 @@ def get_fragmentation_probability_energy_node_removal(
 
     Notes
     -----
-    The energy of neighbouring nodes is not updated when a node is removed.
+    The strength of neighbouring nodes is not updated when a node is removed.
     """
     G_ = G.copy()
-    init_nodes_energy(G_)
+    init_nodes_strength(G_)
     pfrag, n = get_fragmentation_probability(
         G_,
         iterations,
-        energy_nodes_fragment,
+        strength_nodes_fragment,
         fragment_settings={
-            "fragmentation": removal_energy,
+            "fragmentation": removed_strength,
         },
         debug=debug,
         debug_interval=debug_interval,
@@ -145,20 +145,20 @@ def get_fragmentation_probability_energy_node_removal(
     return pfrag
 
 
-def get_fragmentation_probability_energy_edge_removal(
-    G: nx.Graph, removal_energy: float, iterations: int, process_number: int = 1, debug: bool = False, debug_interval: int=100000
+def get_fragmentation_probability_strength_edge_removal(
+    G: nx.Graph, removed_strength: float, iterations: int, process_number: int = 1, debug: bool = False, debug_interval: int=100000
 ) -> float:
     """
-    Compute the probability of a graph fragmenting when removing random edges util a fraction of the graph "energy" has been removed.
-    Each edge has a probability weight proportional to the inverse of its `energy` attribute.
-    The energy of the graph is defined as the sum of the energy of all edges.
+    Compute the probability of a graph fragmenting when removing random edges util a fraction of the graph "strength" has been removed.
+    Each edge has a probability weight proportional to the inverse of its `strength` attribute.
+    The strength of the graph is defined as the sum of the strength of all edges.
 
     Parameters
     ----------
     G : nx.Graph
         The graph to analyse
-    removal_energy : float
-        The fraction of the graph energy to remove, a float between 0 and 1.
+    removed_strength : float
+        The fraction of the graph strength to remove, a float between 0 and 1.
     iterations : int
         The number of iterations used for the estiamtion
     process_number: int, optional
@@ -176,9 +176,9 @@ def get_fragmentation_probability_energy_edge_removal(
     pfrag, n = get_fragmentation_probability(
         G,
         iterations,
-        energy_edges_fragment,
+        strength_edges_fragment,
         fragment_settings={
-            "fragmentation": removal_energy,
+            "fragmentation": removed_strength,
         },
         debug=debug,
         debug_interval=debug_interval,
@@ -291,7 +291,7 @@ def get_fragmentation_probability_threshold_edge(
     return pf, n
 
 
-def get_fragmentation_energy_threshold_edge(
+def get_fragmentation_strength_threshold_edge(
     G: nx.Graph,
     error_probability: float,
     steps: int,
@@ -302,8 +302,8 @@ def get_fragmentation_energy_threshold_edge(
     debug_interval: int = 100000,
 ) -> Tuple[float, int]:
     """
-    Estimate the fraction of the graph energy that needs to be removed (by randomly removing edges) to fragment the graph with a probability of 1/2.
-    The probability weight of edges is inversly proportional to its `energy` attribute.
+    Estimate the fraction of the graph strength that needs to be removed (by randomly removing edges) to fragment the graph with a probability of 1/2.
+    The probability weight of edges is inversly proportional to its `strength` attribute.
 
     Parameters
     ----------
@@ -327,13 +327,13 @@ def get_fragmentation_energy_threshold_edge(
     Returns
     -------
     Tuple[float, int]
-        The estimated fraction of energy to remove and the number of step reached.
+        The estimated strength to remove and the number of step reached.
     """
     pf, n = bisection(
         G,
         steps,
         error_probability,
-        energy_edges_fragment,
+        strength_edges_fragment,
         fragment_settings={},
         min_iterations=min_iterations,
         max_iterations=max_iterations,
@@ -344,7 +344,7 @@ def get_fragmentation_energy_threshold_edge(
     return pf, n
 
 
-def get_fragmentation_energy_threshold_node(
+def get_fragmentation_strength_threshold_node(
     G: nx.Graph,
     error_probability: float,
     steps: int,
@@ -355,8 +355,8 @@ def get_fragmentation_energy_threshold_node(
     debug_interval: int = 100000,
 ) -> Tuple[float, int]:
     """
-    Estimate the fraction of the graph energy that needs to be removed (by randomly removing nodes) to fragment the graph with a probability of 1/2.
-    The probability weight of nodes is inversly proportional to its energy which is defined as the sum of the energy of all edges connected to the node.
+    Estimate the fraction of the graph strength that needs to be removed (by randomly removing nodes) to fragment the graph with a probability of 1/2.
+    The probability weight of nodes is inversly proportional to its strength which is defined as the sum of the strength of all edges connected to the node.
 
     Parameters
     ----------
@@ -380,15 +380,15 @@ def get_fragmentation_energy_threshold_node(
     Returns
     -------
     Tuple[float,int]
-        The estimated fraction of energy to remove and the number of step reached.
+        The estimated strength to remove and the number of step reached.
     """
     G_ = G.copy()
-    init_nodes_energy(G_)
+    init_nodes_strength(G_)
     pf, n = bisection(
         G_,
         steps,
         error_probability,
-        energy_nodes_fragment,
+        strength_nodes_fragment,
         fragment_settings={},
         min_iterations=min_iterations,
         max_iterations=max_iterations,

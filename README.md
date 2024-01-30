@@ -32,28 +32,28 @@ Minimum and maximum numbers of iterations for each bisection step can be provide
 ## Weighted graphs
 
 ### Removing edges
-The energy of each bond is stored as the `energy` attribute of the corresponding edge in the graph. When removing edges in the graph we take into account this energy by attributing probability weights to each edge. This weight is defined as being proportional to the inverse of the energy. 
-In order to remove a certain “energy amount” from the capsid, we define the notion of fragmentation probability by repeating following procedure:
+The strength of each bond is stored as the `strength` attribute of the corresponding edge in the graph. When removing edges in the graph we take into account this strength by attributing probability weights to each edge. This weight is defined as being proportional to the inverse of the strength. 
+In order to remove a certain “amount of strength” from the capsid, we define the notion of fragmentation probability by repeating following procedure:
 * We first randomly pick an edge from the graph using the build it `choices` function from the `random` library.
-* We then remove the energy of this bond from the total, thus computing the amount of energy that is left to remove.
+* We then remove the strength of this bond from the total, thus computing the amount of strength that is left to remove.
 * We remove the corresponding bond from the list of remaining bonds.
-* We repeat this process as long as there is a bond in the graph that has less energy than the amount we have yet to remove.
+* We repeat this process as long as there is a bond in the graph that has less strength than the amount we have yet to remove.
 * Once we are no longer able to remove edges, we determine whether or not the graph is fragmented using the `networkx` method for both removing edges and checking the connectivity of the graph.  
 
-The function `energy_edges_fragment` implements the edge removal process, and takes as argument the graph to remove, and a Dict which `fragmentation` entry represents the amount of energy to remove from the graph.
+The function `strength_edges_fragment` implements the edge removal process, and takes as argument the graph to remove, and a Dict which `fragmentation` entry represents the amount of strength to remove from the graph.
 
-The function `get_fragmentation_probability_energy_edge_removal` computes the probability of fragmentation given an amount of energy to remove by using a Monte Carlo method: the previously described procedure is repeated to approximate the fragmentation probability.
+The function `get_fragmentation_probability_strength_edge_removal` computes the probability of fragmentation given an amount of strength to remove by using a Monte Carlo method: the previously described procedure is repeated to approximate the fragmentation probability.
 The number of iterations and the edge removal probability are given as parameters.
 
-The function `get_fragmentation_energy_threshold_edge` approximates the energy percolation threshold (i.e., the “energy” to remove in order to obtain a probability of fragmentation of 0.5) by using the same bisection method as `get_fragmentation_probability_threshold_node`, using `get_fragmentation_probability_energy_edge_removal` for each step.
+The function `get_fragmentation_strength_threshold_edge` approximates the strength percolation threshold (i.e., the “strength” to remove in order to obtain a probability of fragmentation of 0.5) by using the same bisection method as `get_fragmentation_probability_threshold_node`, using `get_fragmentation_probability_strength_edge_removal` for each step.
 
 ### Removing nodes
-The “energy of a node” is defined as the “energy” needed to remove it, i.e as the sum of the energies of all edges adjacent to it. The method for removing nodes is similar to the one for removing edges: the probability weight of each node is proportional to the inverse of its energy. Here the energy of each node is stored as a networkx attribute. The main difference being that as a node gets removed, the energies of the neighbouring nodes have to be decreased by the energy of the edges that were linked to them via the removed node. This process can also leave isolated nodes that have an energy of zero, with undefined probability weights. This situation is avoided by removing isolated neighbours as well as the chosen node.  
-Note that the `get_fragmentation_energy_threshold_node` and `get_fragmentation_probability_energy_node_removal` functions are, respectively, similar to `get_fragmentation_energy_threshold_edge` and `get_fragmentation_probability_energy_edge_removal` in terms of parameters.
+The “strength of a node” is defined as the “strength” needed to remove it, i.e as the sum of the energies of all edges adjacent to it. The method for removing nodes is similar to the one for removing edges: the probability weight of each node is proportional to the inverse of its strength. Here the strength of each node is stored as a networkx attribute. The main difference being that as a node gets removed, the energies of the neighbouring nodes have to be decreased by the strength of the edges that were linked to them via the removed node. This process can also leave isolated nodes that have an strength of zero, with undefined probability weights. This situation is avoided by removing isolated neighbours as well as the chosen node.  
+Note that the `get_fragmentation_strength_threshold_node` and `get_fragmentation_probability_strength_node_removal` functions are, respectively, similar to `get_fragmentation_strength_threshold_edge` and `get_fragmentation_probability_strength_edge_removal` in terms of parameters.
 
-The function `energy_nodes_fragment` implements the node removal process and has the same argments as the `energy_edges_fragment` function.
+The function `strength_nodes_fragment` implements the node removal process and has the same argments as the `strength_edges_fragment` function.
 
-Note that for these functions to work properly, the `energy` attribute of the nodes needs to be initialized before passing the graph to the functions. The `init_nodes_energy` function sets the nodes attribute as previously described, given a graph where the edge energy attributes are already defined. See the examples for more details.
+Note that for these functions to work properly, the `strength` attribute of the nodes needs to be initialized before passing the graph to the functions. The `init_nodes_strength` function sets the nodes attribute as previously described, given a graph where the edge strength attributes are already defined. See the examples for more details.
 
 ## Hole size detection
 The `capsidgraph.generator` modules provides methods to compute the statistic destribution of "hole sizes" in graph under fragmentation.
@@ -132,7 +132,7 @@ This construction is implemented in the function `create_icosahedral_capsid_grap
 
 * `face_edges` : a list of edges corresponding to the edges of a triangular face;
 * `triangle_vertices` : the three vertices delimiting the faces (tuple of 3 points);
-* `bond_strength` : optional, this list needs to have the same length as `face_edges`. This parameter defines the bond energy of every vertex of the capsid graph, where  `bond_strength[i]` corresponds to the energy of the bond `face_edges[i]`.
+* `bond_strength` : optional, this list needs to have the same length as `face_edges`. This parameter defines the bond strength of every vertex of the capsid graph, where  `bond_strength[i]` corresponds to the strength of the bond `face_edges[i]`.
 
 ## Cubic graph generation
 Some nanoparticle interaction networks can be constructed through a process similar to the icosahedral generation algorithm, where the icosahedral pattern is replaced by a cubic one. The faces are now squares which vertices sit in 4-fold symetry axis of the lattice.

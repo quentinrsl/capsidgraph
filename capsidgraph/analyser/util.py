@@ -3,12 +3,12 @@ from typing import List
 
 
 # intialize weights on nodes
-# Create weight on nodes based on the sum of the energy of the bonds attached to it
+# Create weight on nodes based on the sum of the strength of the bonds attached to it
 # Ignore nodes that are in the blacklist (act if they were removed)hist
-def _init_nodes_energy(G: nx.Graph) -> List[float]:
+def _init_nodes_strength(G: nx.Graph) -> List[float]:
     """
-    Initialize the energy of each node of the graph G by setting the `energy` attribute of each nodes.
-    The energy of a node is the sum of the energy of the edges attached to it.
+    Initialize the strength of each node of the graph G by setting the `strength` attribute of each nodes.
+    The strength of a node is the sum of the strength of the edges attached to it.
 
     Parameters
     ----------
@@ -22,15 +22,15 @@ def _init_nodes_energy(G: nx.Graph) -> List[float]:
     """
     # Compute node weights
     for node in G.nodes():
-        energy = 0
+        strength = 0
         for edge in G.edges(node):
-            energy += G[edge[0]][edge[1]]["energy"]
-        G.nodes[node]["energy"] = energy
+            strength += G[edge[0]][edge[1]]["strength"]
+        G.nodes[node]["strength"] = strength
     # Compute edge probability weights
     nodes_probability_weights = []
     for e in G.nodes:
-        nodes_probability_weights.append(1 / G.nodes[e]["energy"])
-        energy = 0
+        nodes_probability_weights.append(1 / G.nodes[e]["strength"])
+        strength = 0
         for edge in G.edges(node):
-            energy += G[edge[0]][edge[1]]["energy"]
+            strength += G[edge[0]][edge[1]]["strength"]
     return nodes_probability_weights

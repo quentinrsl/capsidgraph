@@ -23,7 +23,7 @@ def create_icosahedral_capsid_graph(
     bond_strength: List[float] | None = None,
 ) -> nx.Graph:
     if bond_strength != None and 0 in bond_strength:
-        raise GraphCreationException("Bond cannot have 0 energy")
+        raise GraphCreationException("Bond cannot have 0 strength")
     G = nx.Graph()
     coordinates = {}
     node_id = 0
@@ -94,7 +94,7 @@ def create_cubic_capsid_graph(
     bond_strength: List[float] | None = None,
 ) -> nx.Graph:
     if bond_strength != None and 0 in bond_strength:
-        raise GraphCreationException("Bond cannot have 0 energy")
+        raise GraphCreationException("Bond cannot have 0 strength")
     G = nx.Graph()
     coordinates = {}
     node_id = 0

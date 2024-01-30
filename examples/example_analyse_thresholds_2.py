@@ -16,8 +16,8 @@ k = 1
 [edges, Tx, Ty, Tscale] = icosahedral_patterns.PATTERN_333333
 face_edges, axis = create_icosahedral_face_edges(edges, Tx, Ty, h, k)
 G_original = create_icosahedral_capsid_graph(face_edges, axis)
-nx.set_edge_attributes(G_original, 1/len(G_original.edges), "energy")
-init_nodes_energy(G_original)
+nx.set_edge_attributes(G_original, 1/len(G_original.edges), "strength")
+init_nodes_strength(G_original)
 
 def is_fragmented(G,G_original=G_original):
     s = get_hole_size(G,G_original)
@@ -25,7 +25,7 @@ def is_fragmented(G,G_original=G_original):
 
 hole_unweighted_threshold_nodes = bisection(G_original, steps, error_prob, probability_fragment, fragment_settings={"fragmentation_type" : "nodes"},debug=True, max_iterations=max_iterations, process_number=process_number)
 hole_unweighted_threshold_edges = bisection(G_original, steps, error_prob, probability_fragment, fragment_settings={"fragmentation_type" : "edges"},debug=True, max_iterations=max_iterations, process_number=process_number)
-hole_weighted_threshold_nodes = bisection(G_original, steps, error_prob, energy_nodes_fragment, fragment_settings={},debug=True, max_iterations=max_iterations, process_number=process_number)
+hole_weighted_threshold_nodes = bisection(G_original, steps, error_prob, strength_nodes_fragment, fragment_settings={},debug=True, max_iterations=max_iterations, process_number=process_number)
 
 print("Unweighted threshold nodes: ", hole_unweighted_threshold_nodes)
 print("Unweighted threshold edges: ", hole_unweighted_threshold_edges)

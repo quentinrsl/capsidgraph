@@ -55,7 +55,7 @@ def _create_face_graph(
     face_id : int
         The id of the face the graph represents
     bond_strength : List[float]
-        List of the energy values for the edges, the i-th element of this list represent the energy of the i-th edge
+        List of the strength values for the edges, the i-th element of this list represent the strength of the i-th edge
 
     Returns
     -------
@@ -80,7 +80,7 @@ def _create_face_graph(
         id2 = _get_point_id(face_coordinates, x2, y2)
         if bond_strength != None:
             w = bond_strength[i]
-            face_graph.add_edge(id1, id2, energy=w)
+            face_graph.add_edge(id1, id2, strength=w)
         else:
             face_graph.add_edge(id1, id2)
     return face_graph, face_coordinates

@@ -10,14 +10,14 @@ from capsidgraph.generator import (
 )
 from capsidgraph.analyser import (
     probability_fragment,
-    energy_nodes_fragment,
+    strength_nodes_fragment,
     get_hole_size_distribution,
 )
 
-from capsidgraph.analyser import init_nodes_energy
+from capsidgraph.analyser import init_nodes_strength
 
 """
-This example is similar to example_analyse_hole_size.py, but the distribution is computed for different fraction of energy removed.
+This example is similar to example_analyse_hole_size.py, but the distribution is computed for different fraction of strength removed.
 The result is animated with matplotlib
 """
 
@@ -29,15 +29,15 @@ k = 1
 [edges, Tx, Ty, Tscale] = icosahedral_patterns.PATTERN_666
 face_edges, axis = create_icosahedral_face_edges(edges, Tx, Ty, h, k)
 G = create_icosahedral_capsid_graph(face_edges, axis)
-nx.set_edge_attributes(G, 1 / len(G.edges), "energy")
-init_nodes_energy(G)
+nx.set_edge_attributes(G, 1 / len(G.edges), "strength")
+init_nodes_strength(G)
 distributions = []
 for p in np.linspace(0, 1, frames):
     print("Computing for p=", p)
     # distributions.append(get_hole_size_distribution(G, iterations, probability_fragment, {"fragmentation":p, "fragmentation_type":"nodes"}))
     distributions.append(
         get_hole_size_distribution(
-            G, iterations, energy_nodes_fragment, {"fragmentation": p}
+            G, iterations, strength_nodes_fragment, {"fragmentation": p}
         )
     )
 

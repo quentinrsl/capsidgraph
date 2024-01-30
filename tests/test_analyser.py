@@ -8,13 +8,13 @@ from capsidgraph.analyser.analyse import (
 )
 from capsidgraph.analyser.fragment import (
     probability_fragment,
-    energy_edges_fragment,
-    energy_nodes_fragment,
+    strength_edges_fragment,
+    strength_nodes_fragment,
 )
-from capsidgraph.analyser.util import _init_nodes_energy
+from capsidgraph.analyser.util import _init_nodes_strength
 from capsidgraph.analyser import (
-    get_fragmentation_energy_threshold_edge,
-    get_fragmentation_energy_threshold_node,
+    get_fragmentation_strength_threshold_edge,
+    get_fragmentation_strength_threshold_node,
     get_fragmentation_probability_threshold_edge,
     get_fragmentation_probability_threshold_node,
     get_fragmentation_probability_random_edge_removal,
@@ -97,63 +97,63 @@ class TestAnalyser(unittest.TestCase):
         self.assertGreater(pfrag, 0)
         self.assertGreaterEqual(n, 100)
 
-    def test_fragment_energy_nodes(self):
+    def test_fragment_strength_nodes(self):
         G = nx.read_adjlist("tests/testcase1.adjlist")
-        nx.set_edge_attributes(G, 1 / len(G.edges), "energy")
-        _init_nodes_energy(G)
+        nx.set_edge_attributes(G, 1 / len(G.edges), "strength")
+        _init_nodes_strength(G)
         for n in G.nodes:
             s = 0
             for nei in nx.neighbors(G, n):
-                s += G.edges[(n, nei)]["energy"]
-            self.assertEqual(G.nodes[n]["energy"], s)
+                s += G.edges[(n, nei)]["strength"]
+            self.assertEqual(G.nodes[n]["strength"], s)
 
-    def test_fragment_energy_bonds(self):
+    def test_fragment_strength_bonds(self):
         G = nx.read_adjlist("tests/testcase1.adjlist")
-        nx.set_edge_attributes(G, 1 / len(G.edges), "energy")
-        energy = 0.6
-        G_ = energy_edges_fragment(G, {"fragmentation": energy})
-        remaining_energy = 0
+        nx.set_edge_attributes(G, 1 / len(G.edges), "strength")
+        strength = 0.6
+        G_ = strength_edges_fragment(G, {"fragmentation": strength})
+        remaining_strength = 0
         for e in G_.edges:
-            remaining_energy += G_.edges[e]["energy"]
-        print(remaining_energy, 1 - energy)
-        self.assertAlmostEqual(remaining_energy, 1 - energy)
+            remaining_strength += G_.edges[e]["strength"]
+        print(remaining_strength, 1 - strength)
+        self.assertAlmostEqual(remaining_strength, 1 - strength)
 
-    def test_fragment_energy_nodes(self):
+    def test_fragment_strength_nodes(self):
         G = nx.read_adjlist("tests/testcase1.adjlist")
-        nx.set_edge_attributes(G, 1 / len(G.edges), "energy")
-        _init_nodes_energy(G)
-        fragmentation_energy = 0.5
-        G_ = energy_nodes_fragment(G, {"fragmentation": fragmentation_energy})
-        remaining_energy = 0
+        nx.set_edge_attributes(G, 1 / len(G.edges), "strength")
+        _init_nodes_strength(G)
+        fragmentation_strength = 0.5
+        G_ = strength_nodes_fragment(G, {"fragmentation": fragmentation_strength})
+        remaining_strength = 0
         for e in G_.edges:
-            remaining_energy += G_.edges[e]["energy"]
-        self.assertAlmostEqual(remaining_energy, 1 - fragmentation_energy, places=2)
+            remaining_strength += G_.edges[e]["strength"]
+        self.assertAlmostEqual(remaining_strength, 1 - fragmentation_strength, places=2)
 
         for n in G.nodes:
             s = 0
             for nei in nx.neighbors(G, n):
-                s += G.edges[(n, nei)]["energy"]
-            self.assertEqual(G.nodes[n]["energy"], s)
+                s += G.edges[(n, nei)]["strength"]
+            self.assertEqual(G.nodes[n]["strength"], s)
 
     def test_bisection(self):
         steps = 3
         error_probability = 0.05
         G = nx.read_edgelist("tests/testcase2.edgelist")
         for e in G.edges:
-            G.edges[e]["energy"] = 1 / len(G.edges)
-        _init_nodes_energy(G)
+            G.edges[e]["strength"] = 1 / len(G.edges)
+        _init_nodes_strength(G)
         pf, n = bisection(
-            G, steps, error_probability, energy_edges_fragment, fragment_settings={}, debug=True, debug_interval=100
+            G, steps, error_probability, strength_edges_fragment, fragment_settings={}, debug=True, debug_interval=100
         )
         self.assertAlmostEqual(pf, 0.375)
 
     def test_wrappers(self):
         G = nx.read_edgelist("tests/testcase2.edgelist")
         for e in G.edges:
-            G.edges[e]["energy"] = 1 / len(G.edges)
-        pf, n = get_fragmentation_energy_threshold_edge(G, 0.1, 3)
+            G.edges[e]["strength"] = 1 / len(G.edges)
+        pf, n = get_fragmentation_strength_threshold_edge(G, 0.1, 3)
         self.assertAlmostEqual(pf, 0.375)
-        pf, n = get_fragmentation_energy_threshold_node(G, 0.1, 3)
+        pf, n = get_fragmentation_strength_threshold_node(G, 0.1, 3)
         self.assertAlmostEqual(pf, 0.875)
         pf, n = get_fragmentation_probability_threshold_edge(G, 0.1, 3)
         self.assertAlmostEqual(pf, 0.375)
