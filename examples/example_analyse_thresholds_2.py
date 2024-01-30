@@ -23,9 +23,9 @@ def is_fragmented(G,G_original=G_original):
     s = get_hole_size(G,G_original)
     return s >= len(G_original.nodes)//2
 
-hole_unweighted_threshold_nodes = bisection(G_original, steps, error_prob, probability_fragment, fragment_settings={"fragmentation_type" : "nodes"},debug=True, max_iterations=max_iterations, process_number=process_number)
-hole_unweighted_threshold_edges = bisection(G_original, steps, error_prob, probability_fragment, fragment_settings={"fragmentation_type" : "edges"},debug=True, max_iterations=max_iterations, process_number=process_number)
-hole_weighted_threshold_nodes = bisection(G_original, steps, error_prob, strength_nodes_fragment, fragment_settings={},debug=True, max_iterations=max_iterations, process_number=process_number)
+hole_unweighted_threshold_nodes = bisection(G_original, steps, error_prob, probability_fragment,is_fragmented=is_fragmented, fragment_settings={"fragmentation_type" : "nodes"},debug=True, max_iterations=max_iterations, process_number=process_number)
+hole_unweighted_threshold_edges = bisection(G_original, steps, error_prob, probability_fragment,is_fragmented=is_fragmented, fragment_settings={"fragmentation_type" : "edges"},debug=True, max_iterations=max_iterations, process_number=process_number)
+hole_weighted_threshold_nodes = bisection(G_original, steps, error_prob, strength_nodes_fragment,is_fragmented=is_fragmented, fragment_settings={},debug=True, max_iterations=max_iterations, process_number=process_number)
 
 print("Unweighted threshold nodes: ", hole_unweighted_threshold_nodes)
 print("Unweighted threshold edges: ", hole_unweighted_threshold_edges)
